@@ -13,6 +13,11 @@ import org.apache.hadoop.conf.Configured;
 
 public class SalesCountryDriver {
 	public static void main(String[] args) {
+
+		//TODO
+		Configuration conf = new Configuration();
+
+
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
 		JobConf job_conf = new JobConf(SalesCountryDriver.class);

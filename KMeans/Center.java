@@ -27,16 +27,24 @@ public class Center extends Element{
     }
 
 
-    public sumCenter(Center c)
-    {
+    public sumCenter(Center c){
         this.x = c.x;
         this.y = c.y;
         this.z = c.z;
     }
 
-    public incInstance()
-    {
+    public incInstance(){
         this.instanceNum++;
+    }
+
+    public addInstance(Center c){
+        this.instanceNum += c.instanceNum;
+    }
+
+    public mean(){
+        this.x /= this.instanceNum;
+        this.y /= this.instanceNum;
+        this.z /= this.instanceNum;
     }
 
 }

@@ -45,7 +45,7 @@ public class SalesMapper extends MapReduceBase implements Mapper<LongWritable, T
 
     }
 
-	public void map(LongWritable key, Text value, OutputCollector<int, Vector<double>> output, Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, OutputCollector<int, Element> output, Reporter reporter) throws IOException {
 
 
 		double minDis = double.MAX_VALUE;

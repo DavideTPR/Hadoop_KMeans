@@ -9,7 +9,7 @@ import org.apache.hadoop.mapred.*;
 
 public class SalesCountryReducer extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
 
-	public void reduce(int t_key, Iterable<Element> values, OutputCollector<Text,IntWritable> output, Reporter reporter) throws IOException {
+	public void reduce(int t_key, Iterable<Element> values, OutputCollector<Text,Center> output, Reporter reporter) throws IOException {
 		
 		int key = t_key;
 

@@ -9,15 +9,19 @@ import org.apache.hadoop.mapred.*;
 
 public class SalesCountryReducer extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
 
-	public void reduce(Text t_key, Iterator<IntWritable> values, OutputCollector<Text,IntWritable> output, Reporter reporter) throws IOException {
-		Text key = t_key;
-		int frequencyForCountry = 0;
+	public void reduce(int t_key, Iterator<Center> values, OutputCollector<int,Center> output, Reporter reporter) throws IOException {
+		int key = t_key;
+		Center newCenter = new Center()
 		while (values.hasNext()) {
 			// replace type of value with the actual type of our value
-			IntWritable value = (IntWritable) values.next();
-			frequencyForCountry += value.get();
-			
+			Center value = (Center) values.next();
+			newCenter.sumCenter(value);
+			newCenter.addInstance(value);
 		}
-		output.collect(key, new IntWritable(frequencyForCountry));
+
+		newCenter.mean();
+
+
+		output.collect(key, newCenter);
 	}
 }
