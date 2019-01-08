@@ -11,7 +11,7 @@ import org.apache.hadoop.conf.Configured;
 //import org.apache.hadoop.fs.FileStatus;
 //import org.apache.hadoop.conf.Configuration;
 
-public class SalesCountryDriver {
+public class KMeanDriver {
 	public static void main(String[] args) {
 
 		//TODO
@@ -20,18 +20,19 @@ public class SalesCountryDriver {
 
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
-		JobConf job_conf = new JobConf(SalesCountryDriver.class);
+		JobConf job_conf = new JobConf(KMeanDriver.class);
 
 		// Set a name of the Job
-		job_conf.setJobName("SalePerCountry");
+		job_conf.setJobName("KMeans");
 
 		// Specify data type of output key and value
-		job_conf.setOutputKeyClass(Text.class);
-		job_conf.setOutputValueClass(IntWritable.class);
+		job_conf.setOutputKeyClass(Integer.class);
+		job_conf.setOutputValueClass(Center.class);
 
 		// Specify names of Mapper and Reducer Class
-		job_conf.setMapperClass(SalesCountry.SalesMapper.class);
-		job_conf.setReducerClass(SalesCountry.SalesCountryReducer.class);
+		job_conf.setMapperClass(KMean.KMeanMapper.class);
+		job_conf.setCombinerClass(KMean.KMeanCombiner.class);
+		job_conf.setReducerClass(KMean.KMeanReducer.class);
 
 		// Specify formats of the data type of Input and output
 		job_conf.setInputFormat(TextInputFormat.class);

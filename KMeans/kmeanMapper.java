@@ -1,6 +1,7 @@
 package KMean;
 
 import java.io.IOException;
+import java.util.Vector;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -9,9 +10,10 @@ import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.*;
 
+
 //import Center;
 
-public class SalesMapper extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
+public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, Text, Integer, Element> {
 	//private final static IntWritable one = new IntWritable(1);
 
 	//vettore dei centroidi
@@ -45,10 +47,10 @@ public class SalesMapper extends MapReduceBase implements Mapper<LongWritable, T
 
     }
 
-	public void map(LongWritable key, Text value, OutputCollector<int, Element> output, Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, OutputCollector<Integer, Element> output, Reporter reporter) throws IOException {
 
 
-		double minDis = double.MAX_VALUE;
+		double minDis = Double.MAX_VALUE;
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
@@ -63,13 +65,13 @@ public class SalesMapper extends MapReduceBase implements Mapper<LongWritable, T
 		//instance.add(double.parseDouble(SingleData[1]));
 		//instance.add(double.parseDouble(SingleData[2]));
 
-		element = new Center(double.parseDouble(SingleData[0]), double.parseDouble(SingleData[1]), double.parseDouble(SingleData[2]));
+		element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
 
 		for(int i = 0; i < centroids.size(); i++){
-			dis = Center.distance(centroids[i], element);
+			//dis = Center.distance(centroids[i], element);
 			if(dis < minDis)
 			{
-				cent = centroids[i];
+				//cent = centroids[i];
 				minDis = dis;
 				index = i;
 			}

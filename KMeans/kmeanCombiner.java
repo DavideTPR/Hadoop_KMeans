@@ -2,14 +2,16 @@ package KMean;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 
-public class SalesCountryReducer extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
+public class KMeanCombiner extends MapReduceBase implements Reducer<Integer, Element, Integer, Center> {
 
-	public void reduce(int t_key, Iterable<Element> values, OutputCollector<Text,Center> output, Reporter reporter) throws IOException {
+	
+	public void reduce(Integer t_key, Iterator<Element> values, OutputCollector<Integer,Center> output, Reporter reporter) throws IOException {
 		
 		int key = t_key;
 
