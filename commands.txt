@@ -1,0 +1,4 @@
+export CLASSPATH="$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.9.1.jar:$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.9.1.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.9.1.jar:~/KMeansProject/KMeans/*:$HADOOP_HOME/lib/*"
+
+
+javac -d . Center.java Element.java KMeanMapper.java KMeanCombiner.java KMeanReducer.java KMeanDriver

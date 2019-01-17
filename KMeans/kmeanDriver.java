@@ -12,11 +12,54 @@ import org.apache.hadoop.conf.Configured;
 //import org.apache.hadoop.conf.Configuration;
 
 public class KMeanDriver {
+
+
+	private static void createCenter(int k, configuration conf, Path input, Path centers){
+		SequenceFile.Writer centers = new SequenceFile.CreateWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+	
+		try {
+
+			FileSystem fs = FileSystem.get(new Configuration());
+			FileStatus[] ri = fs.listStatus(input);
+
+			/*for (int i = 0; i < ri.length; i++) {
+				System.out.println(i + "-------------------------------------" + ri[i].getPath());
+			}*/
+
+			BufferReader brData = new BufferReader(new FileReader(ri[0].getPath()));
+			String line;
+			Center tmp;
+
+			for(int i=0; i<k; i++)
+			{
+				line = brData.readLine();
+				String[] data = line.split('\t');
+
+				tmp = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
+
+				centers.append(new IntWritable(i), tmp);
+			}
+
+
+			brData.close();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		centers.close();
+	
+	}
+
+
+
 	public static void main(String[] args) {
 
 		//TODO
 		Configuration conf = new Configuration();
 
+		Path centers = new Path("centers/cent.seq");
+		Path input = new Path(args[0]);
 
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
@@ -43,6 +86,8 @@ public class KMeanDriver {
 		
 		FileInputFormat.setInputPaths(job_conf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job_conf, new Path(args[1]));
+		
+
 
 		my_client.setConf(job_conf);
 		try {
