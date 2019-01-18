@@ -8,12 +8,12 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 
-public class KMeanCombiner extends MapReduceBase implements Reducer<Integer, Element, Integer, Center> {
+public class KMeanCombiner extends MapReduceBase implements Reducer<IntWritable, Element, IntWritable, Center> {
 
 	
-	public void reduce(Integer t_key, Iterator<Element> values, OutputCollector<Integer,Center> output, Reporter reporter) throws IOException {
+	public void reduce(IntWritable t_key, Iterator<Element> values, OutputCollector<IntWritable,Center> output, Reporter reporter) throws IOException {
 		
-		int key = t_key;
+		int key = t_key.get();
 
 		Center valueSum = new Center();
 		
@@ -24,6 +24,6 @@ public class KMeanCombiner extends MapReduceBase implements Reducer<Integer, Ele
 			valueSum.incInstance();
 			
 		}
-		output.collect(key, valueSum);
+		output.collect(new IntWritable(key), valueSum);
 	}
 }

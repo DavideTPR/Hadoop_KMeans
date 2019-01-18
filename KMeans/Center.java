@@ -48,4 +48,8 @@ public class Center extends Element{
         this.z.set(this.z.get() / this.instanceNum);
     }
 
+    public String toString(){
+        return this.x.get() + " - " + this.y.get() + " - " + this.z.get();
+    }
+
 }
