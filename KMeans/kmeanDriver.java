@@ -1,53 +1,64 @@
 
 package KMean;
 
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileReader;
+
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
-
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.Writer;
 //import org.apache.hadoop.fs.FileStatus;
 //import org.apache.hadoop.conf.Configuration;
 
 public class KMeanDriver {
 
 
-	private static void createCenter(int k, configuration conf, Path input, Path centers){
-		SequenceFile.Writer centers = new SequenceFile.CreateWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+	private static void createCenter(int k, Configuration conf, Path input, Path centers){
 	
 		try {
+			//SequenceFile.Writer centersFile = new SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+
 
 			FileSystem fs = FileSystem.get(new Configuration());
 			FileStatus[] ri = fs.listStatus(input);
+
+			SequenceFile.Writer centersFile = new SequenceFile.Writer(fs, conf, centers, IntWritable.class, Center.class);
 
 			/*for (int i = 0; i < ri.length; i++) {
 				System.out.println(i + "-------------------------------------" + ri[i].getPath());
 			}*/
 
-			BufferReader brData = new BufferReader(new FileReader(ri[0].getPath()));
+			BufferedReader brData = new BufferedReader(new InputStreamReader(fs.open(ri[0].getPath())));
 			String line;
 			Center tmp;
 
 			for(int i=0; i<k; i++)
 			{
 				line = brData.readLine();
-				String[] data = line.split('\t');
+				String[] data = line.split("\\t");
 
-				tmp = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
+				tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
 
-				centers.append(new IntWritable(i), tmp);
+				centersFile.append(new IntWritable(i), tmp);
 			}
 
-
 			brData.close();
+			centersFile.close();
+
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 
 
-		centers.close();
+		
 	
 	}
 
@@ -61,9 +72,13 @@ public class KMeanDriver {
 		Path centers = new Path("centers/cent.seq");
 		Path input = new Path(args[0]);
 
+		conf.set("centersPath", centers.toString());
+
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
 		JobConf job_conf = new JobConf(KMeanDriver.class);
+
+		createCenter(5, conf, input, centers);
 
 		// Set a name of the Job
 		job_conf.setJobName("KMeans");

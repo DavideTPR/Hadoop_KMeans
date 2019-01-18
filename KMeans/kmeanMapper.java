@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.conf.*;
@@ -27,10 +28,10 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		//System.out.println("fs.default.name : - " + conf.get("fs.defaultFS"));
 
 		//Cartella in cui è presente il dataset da cui estrapolare i centroidi
-		String uri = conf.get("fs.defaultFS")+"/user/davide.tarasconi/kMeans";
+		//String uri = conf.get("fs.defaultFS")+"/user/davide.tarasconi/kMeans";
 
 		//ricerca, apertura e lettura dataset
-		try {
+		/*try {
 
 			FileSystem fs = FileSystem.get(new Configuration());
 			FileStatus[] ri = fs.listStatus(new Path(uri));
@@ -40,11 +41,22 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		//TODO
 		//lettura file e scelta n centri
 
+		Path centers = new Path(conf.get("centersPath"));
+		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
+		IntWritable key = new IntWritable();
+		Center cent = new Center();
+
+		while(centRead.next(key, cent)){
+			Center tmp = new Center(cent.getX(), cent.getY(), cent.getZ());
+			centroids.add(tmp);
+		}
+
+		centRead.close();
     }
 
 	public void map(LongWritable key, Text value, OutputCollector<Integer, Element> output, Reporter reporter) throws IOException {
@@ -68,10 +80,10 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
 
 		for(int i = 0; i < centroids.size(); i++){
-			//dis = Center.distance(centroids[i], element);
+			dis = Center.distance(centroids.get(i), element);
 			if(dis < minDis)
 			{
-				//cent = centroids[i];
+				cent = centroids.get(i);
 				minDis = dis;
 				index = i;
 			}

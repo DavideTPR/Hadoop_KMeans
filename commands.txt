@@ -1,4 +1,15 @@
 export CLASSPATH="$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.9.1.jar:$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.9.1.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.9.1.jar:~/KMeansProject/KMeans/*:$HADOOP_HOME/lib/*"
 
 
-javac -d . Center.java Element.java KMeanMapper.java KMeanCombiner.java KMeanReducer.java KMeanDriver
+javac -d . Center.java Element.java KMeanMapper.java KMeanCombiner.java KMeanReducer.java KMeanDriver.java
+
+
+jar cfm KMeans.jar Manifest.txt KMean/*.class
+
+
+hdfs dfs -mkdir kmeanDirectory
+
+hdfs dfs -put <nome_file_dataset> kmeanDirectory
+
+
+$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean

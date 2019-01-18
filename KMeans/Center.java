@@ -1,6 +1,7 @@
 package KMean;
 
 import java.lang.Math;
+import org.apache.hadoop.io.DoubleWritable;
 
 public class Center extends Element{
 
@@ -10,10 +11,10 @@ public class Center extends Element{
     private double instanceNum;
     
     public static double distance(Center c1, Center c2) {
-        return Math.sqrt(Math.pow(c1.x - c2.x, 2) + Math.pow(c1.y - c2.y, 2) + Math.pow(c1.z - c2.z, 2));
+        return Math.sqrt(Math.pow(c1.x.get() - c2.x.get(), 2) + Math.pow(c1.y.get() - c2.y.get(), 2) + Math.pow(c1.z.get() - c2.z.get(), 2));
     }
     public static double distance(Center c1, Element c2) {
-        return Math.sqrt(Math.pow(c1.x - c2.x, 2) + Math.pow(c1.y - c2.y, 2) + Math.pow(c1.z - c2.z, 2));
+        return Math.sqrt(Math.pow(c1.x.get() - c2.x.get(), 2) + Math.pow(c1.y.get() - c2.y.get(), 2) + Math.pow(c1.z.get() - c2.z.get(), 2));
     }
     
     public Center(){
@@ -28,9 +29,9 @@ public class Center extends Element{
 
 
     public void sumCenter(Center c){
-        this.x = c.x;
-        this.y = c.y;
-        this.z = c.z;
+        this.x.set(c.x.get());
+        this.y.set(c.y.get());
+        this.z.set(c.z.get());
     }
 
     public void incInstance(){
@@ -42,9 +43,9 @@ public class Center extends Element{
     }
 
     public void mean(){
-        this.x /= this.instanceNum;
-        this.y /= this.instanceNum;
-        this.z /= this.instanceNum;
+        this.x.set(this.x.get() / this.instanceNum);
+        this.y.set(this.y.get() / this.instanceNum);
+        this.z.set(this.z.get() / this.instanceNum);
     }
 
 }
