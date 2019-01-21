@@ -11,10 +11,10 @@ public class Center extends Element{
     private double instanceNum;
     
     public static double distance(Center c1, Center c2) {
-        return Math.sqrt(Math.pow(c1.x.get() - c2.x.get(), 2) + Math.pow(c1.y.get() - c2.y.get(), 2) + Math.pow(c1.z.get() - c2.z.get(), 2));
+        return Math.sqrt(Math.pow(c1.getX() - c2.getX(), 2) + Math.pow(c1.getY() - c2.getY(), 2) + Math.pow(c1.getZ() - c2.getZ(), 2));
     }
     public static double distance(Center c1, Element c2) {
-        return Math.sqrt(Math.pow(c1.x.get() - c2.x.get(), 2) + Math.pow(c1.y.get() - c2.y.get(), 2) + Math.pow(c1.z.get() - c2.z.get(), 2));
+        return Math.sqrt(Math.pow((c1.getX() - c2.getX()), 2) + Math.pow((c1.getY() - c2.getY()), 2) + Math.pow((c1.getZ() - c2.getZ()), 2));
     }
     
     public Center(){

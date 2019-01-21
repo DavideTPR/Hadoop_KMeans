@@ -24,7 +24,7 @@ public class KMeanDriver {
 	private static void createCenter(int k, Configuration conf, Path input, Path centers){
 	
 		try {
-			SequenceFile.Writer centersFile = new SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
 
 
 			FileSystem fs = FileSystem.get(new Configuration());
@@ -36,15 +36,17 @@ public class KMeanDriver {
 				System.out.println(i + "-------------------------------------" + ri[i].getPath());
 			}*/
 
+			//Apro il dataset per estrapolare i centri iniziali, in questo caso le prima k righe 
 			BufferedReader brData = new BufferedReader(new InputStreamReader(fs.open(ri[0].getPath())));
 			String line;
-			Center tmp;
+			Center tmp=new Center();
 
 			for(int i=0; i<k; i++)
 			{
 				line = brData.readLine();
 				String[] data = line.split("\\t");
 
+				//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 				tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
 				System.out.println("-------------------" + tmp.toString());
 				centersFile.append(new IntWritable(i), tmp);
@@ -52,6 +54,30 @@ public class KMeanDriver {
 
 			brData.close();
 			centersFile.close();
+
+
+
+
+			System.out.println("------------------- L E T T U R A    F I L E S E Q -------------------" + Double.MAX_VALUE +"-------------");
+
+
+
+
+
+			SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
+			IntWritable key = new IntWritable();
+			Center cent = new Center();
+			Center tmp1;
+			while(centRead.next(key, cent)){
+				tmp1 = new Center(cent.getX(), cent.getY(), cent.getZ());
+				System.out.println("-------------------" + tmp1.toString());
+				System.out.println("------------------- DIST----------" + Center.distance(tmp, tmp1));
+				//centroids.add(tmp);
+			}
+
+
+
+
 
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -102,6 +128,8 @@ public class KMeanDriver {
 		//System.out.println("88888888888888888888888888888888888888888888888888888888888888888888888888");
 		FileInputFormat.setInputPaths(job_conf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job_conf, new Path(args[1]));
+		job_conf.setMapOutputKeyClass(IntWritable.class);
+		job_conf.setMapOutputValueClass(Center.class);
 		//System.out.println("999999999999999999999999999999999999999999999999999999999999999999999999999");
 
 

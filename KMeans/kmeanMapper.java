@@ -15,7 +15,7 @@ import org.apache.hadoop.fs.*;
 
 //import Center;
 
-public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, Element> {
+public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, Center> {
 	//private final static IntWritable one = new IntWritable(1);
 
 	//vettore dei centroidi
@@ -26,33 +26,14 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 
     	//configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
-		//Root principale del file system hdfs
-		//System.out.println("fs.default.name : - " + conf.get("fs.defaultFS"));
-
-		//Cartella in cui è presente il dataset da cui estrapolare i centroidi
-		//String uri = conf.get("fs.defaultFS")+"/user/davide.tarasconi/kMeans";
-
-		//ricerca, apertura e lettura dataset
-		/*try {
-
-			FileSystem fs = FileSystem.get(new Configuration());
-			FileStatus[] ri = fs.listStatus(new Path(uri));
-
-			for (int i = 0; i < ri.length; i++) {
-				System.out.println(i + "-------------------------------------" + ri[i].getPath());
-			}
-		}catch (Exception e) {
-			e.printStackTrace();
-		}*/
-
-		//TODO
-		//lettura file e scelta n centri
 		
+		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
 		Path centers = new Path(conf.get("centersPath"));
 		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 		IntWritable key = new IntWritable();
 		Center cent = new Center();
-
+		
+		//leggo il file contenente i centri e inizializzo centroids
 		while(centRead.next(key, cent)){
 			Center tmp = new Center(cent.getX(), cent.getY(), cent.getZ());
 			//logger.fatal(tmp.toString());
@@ -62,13 +43,13 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		centRead.close();
     }
 
-	public void map(LongWritable key, Text value, OutputCollector<IntWritable, Element> output, Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, OutputCollector<IntWritable, Center> output, Reporter reporter) throws IOException {
 
-		double minDis = Double.MAX_VALUE;
+		double minDis = 1000000;
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
-		Element element;
+		Center element;
 		Center cent;
 		IntWritable idx;
 
@@ -76,13 +57,11 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		//split string containing TAB
 		String[] SingleData = valueString.split("\\t"); // or \\t
 
-		//instance.add(double.parseDouble(SingleData[0]));
-		//instance.add(double.parseDouble(SingleData[1]));
-		//instance.add(double.parseDouble(SingleData[2]));
+
 
 		element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
 
-		for(int i = 0; i < centroids.size(); i++){
+		/*for(int i = 0; i < centroids.size(); i++){
 			dis = Center.distance(centroids.get(i), element);
 			if(dis < minDis)
 			{
@@ -90,12 +69,26 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 				minDis = dis;
 				index = i;
 			}
+		}*/
+
+		int i = 0;
+		index=1;
+		for(Center c : centroids){
+			index=2;
+			dis = Center.distance(c, element);
+			index=3;
+			if(dis < minDis)
+			{
+				cent = c;
+				minDis = dis;
+				index = i;
+			}
+			i++;
+			index=4;
 		}
 
 		idx = new IntWritable(index);
 
-		/*String valueString = value.toString();
-		String[] SingleCountryData = valueString.split(",");*/
 		output.collect(idx, element);
 	}
 }
