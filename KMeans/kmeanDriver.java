@@ -6,7 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileReader;
 
-
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
@@ -103,12 +103,12 @@ public class KMeanDriver {
 
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
-		JobConf job_conf = new JobConf(KMeanDriver.class);
+		Job job_conf = Job.getInstance(conf, "KMeans");
 		//System.out.println("3333333333333333333333333333333333333333333333333333333333333333333333");
 		createCenter(5, conf, input, centers);
 
 		// Set a name of the Job
-		job_conf.setJobName("KMeans");
+		//job_conf.setJobName("KMeans");
 		//System.out.println("44444444444444444444444444444444444444444444444444444444444444444444444");
 		// Specify data type of output key and value
 		job_conf.setOutputKeyClass(IntWritable.class);
@@ -132,8 +132,8 @@ public class KMeanDriver {
 		job_conf.setMapOutputValueClass(Center.class);
 		//System.out.println("999999999999999999999999999999999999999999999999999999999999999999999999999");
 
-
-		my_client.setConf(job_conf);
+		job_conf.waitForCompletion(true);
+		//my_client.setConf(job_conf);
 		//System.out.println("0000000000000000000000000000000000000000000000000000000000000000000000000000");
 		try {
 			// Run the job 

@@ -7,23 +7,25 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.*;
+//import org.apache.hadoop.mapreduce.Mapper.Context;
 //import org.apache.log4j.Logger;
 
 
 //import Center;
 
-public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, Center> {
+public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 	//private final static IntWritable one = new IntWritable(1);
 
 	//vettore dei centroidi
 	private static Vector<Center> centroids = new Vector<Center>();
 	//private Logger logger = Logger.getLogger(Map.class);
+	int index = -1;
 
-    protected void setup(org.apache.hadoop.mapreduce.Mapper.Context context) throws IOException, InterruptedException{
-
+    protected void setup(Context context) throws IOException, InterruptedException 	{
+		index = 33;
     	//configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
 		
@@ -43,11 +45,11 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		centRead.close();
     }
 
-	public void map(LongWritable key, Text value, OutputCollector<IntWritable, Center> output, Reporter reporter) throws IOException {
+	public void mapmap(Object key, Text value, Context context)throws IOException,InterruptedException {
 
 		double minDis = 1000000;
 		double dis;
-		int index = -1;
+		//int index = -1;
 		//Vector<double> instance;
 		Center element;
 		Center cent;
@@ -72,11 +74,11 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 		}*/
 
 		int i = 0;
-		index=1;
+		//index=1;
 		for(Center c : centroids){
-			index=2;
+			//index=2;
 			dis = Center.distance(c, element);
-			index=3;
+			//index=3;
 			if(dis < minDis)
 			{
 				cent = c;
@@ -89,6 +91,6 @@ public class KMeanMapper extends MapReduceBase implements Mapper<LongWritable, T
 
 		idx = new IntWritable(index);
 
-		output.collect(idx, element);
+		context.write(idx, element);
 	}
 }

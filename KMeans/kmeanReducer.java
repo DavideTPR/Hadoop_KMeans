@@ -6,12 +6,12 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.*;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class KMeanReducer extends MapReduceBase implements Reducer<IntWritable, Center, IntWritable, Center> {
+public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
 
 
-	public void reduce(IntWritable t_key, Iterator<Center> values, OutputCollector<IntWritable,Center> output, Reporter reporter) throws IOException {
+	public void reduce(IntWritable t_key, Iterator<Center> values, Context context) throws IOException {
 		int key = t_key.get();
 		Center newCenter = new Center();
 		while (values.hasNext()) {
@@ -24,6 +24,6 @@ public class KMeanReducer extends MapReduceBase implements Reducer<IntWritable, 
 		newCenter.mean();
 
 
-		output.collect(new IntWritable(key), newCenter);
+		context.write(new IntWritable(key), newCenter);
 	}
 }
