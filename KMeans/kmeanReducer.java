@@ -10,8 +10,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
 
-
-	public void reduce(IntWritable t_key, Iterator<Center> values, Context context) throws IOException {
+	
+	public void reduce(IntWritable t_key, Iterator<Center> values, Context context)  throws IOException, InterruptedException {
 		int key = t_key.get();
 		Center newCenter = new Center();
 		while (values.hasNext()) {

@@ -22,10 +22,10 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 	//vettore dei centroidi
 	private static Vector<Center> centroids = new Vector<Center>();
 	//private Logger logger = Logger.getLogger(Map.class);
-	int index = -1;
 
+	@Override
     protected void setup(Context context) throws IOException, InterruptedException 	{
-		index = 33;
+		
     	//configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
 		
@@ -45,11 +45,12 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		centRead.close();
     }
 
-	public void mapmap(Object key, Text value, Context context)throws IOException,InterruptedException {
+	
+	public void map(Object key, Text value, Context context)throws IOException,InterruptedException {
 
 		double minDis = 1000000;
 		double dis;
-		//int index = -1;
+		int index = -1;
 		//Vector<double> instance;
 		Center element;
 		Center cent;

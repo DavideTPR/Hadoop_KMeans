@@ -15,6 +15,8 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 //import org.apache.hadoop.fs.FileStatus;
 //import org.apache.hadoop.conf.Configuration;
 
@@ -90,7 +92,7 @@ public class KMeanDriver {
 
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		//TODO
 		Configuration conf = new Configuration();
@@ -104,6 +106,7 @@ public class KMeanDriver {
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
 		Job job_conf = Job.getInstance(conf, "KMeans");
+		job_conf.setJarByClass(KMeanDriver.class);
 		//System.out.println("3333333333333333333333333333333333333333333333333333333333333333333333");
 		createCenter(5, conf, input, centers);
 
@@ -115,29 +118,34 @@ public class KMeanDriver {
 		job_conf.setOutputValueClass(Center.class);
 		//System.out.println("55555555555555555555555555555555555555555555555555555555555555555555555");
 		// Specify names of Mapper and Reducer Class
-		job_conf.setMapperClass(KMean.KMeanMapper.class);
-		job_conf.setCombinerClass(KMean.KMeanCombiner.class);
-		job_conf.setReducerClass(KMean.KMeanReducer.class);
+		job_conf.setMapperClass(KMeanMapper.class);
+		job_conf.setCombinerClass(KMeanCombiner.class);
+		job_conf.setReducerClass(KMeanReducer.class);
 		//System.out.println("66666666666666666666666666666666666666666666666666666666666666666666666");
 		// Specify formats of the data type of Input and output
-		job_conf.setInputFormat(TextInputFormat.class);
-		job_conf.setOutputFormat(TextOutputFormat.class);
+		
+		//job_conf.setInputFormat(TextInputFormat.class);
+		//job_conf.setOutputFormat(TextOutputFormat.class);
+		
 		//System.out.println("777777777777777777777777777777777777777777777777777777777777777777777777");
 		// Set input and output directories using command line arguments, 
 		//arg[0] = name of input directory on HDFS, and arg[1] =  name of output directory to be created to store the output file.
 		//System.out.println("88888888888888888888888888888888888888888888888888888888888888888888888888");
+		
 		FileInputFormat.setInputPaths(job_conf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job_conf, new Path(args[1]));
+		
 		job_conf.setMapOutputKeyClass(IntWritable.class);
 		job_conf.setMapOutputValueClass(Center.class);
 		//System.out.println("999999999999999999999999999999999999999999999999999999999999999999999999999");
 
-		job_conf.waitForCompletion(true);
+		
 		//my_client.setConf(job_conf);
 		//System.out.println("0000000000000000000000000000000000000000000000000000000000000000000000000000");
 		try {
 			// Run the job 
-			JobClient.runJob(job_conf);
+			//JobClient.runJob(job_conf);
+			job_conf.waitForCompletion(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
