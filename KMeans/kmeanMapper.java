@@ -45,7 +45,7 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		centRead.close();
     }
 
-	
+		
 	public void map(Object key, Text value, Context context)throws IOException,InterruptedException {
 
 		double minDis = 1000000;
@@ -61,7 +61,6 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		String[] SingleData = valueString.split("\\t"); // or \\t
 
 
-
 		element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
 
 		/*for(int i = 0; i < centroids.size(); i++){
@@ -75,11 +74,11 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		}*/
 
 		int i = 0;
-		//index=1;
+		
 		for(Center c : centroids){
-			//index=2;
+			
 			dis = Center.distance(c, element);
-			//index=3;
+			
 			if(dis < minDis)
 			{
 				cent = c;
@@ -87,7 +86,6 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 				index = i;
 			}
 			i++;
-			index=4;
 		}
 
 		idx = new IntWritable(index);

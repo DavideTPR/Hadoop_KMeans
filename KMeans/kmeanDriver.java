@@ -60,7 +60,7 @@ public class KMeanDriver {
 
 
 
-			System.out.println("------------------- L E T T U R A    F I L E S E Q -------------------" + Double.MAX_VALUE +"-------------");
+			/*System.out.println("------------------- L E T T U R A    F I L E S E Q -------------------" + Double.MAX_VALUE +"-------------");
 
 
 
@@ -72,10 +72,17 @@ public class KMeanDriver {
 			Center tmp1;
 			while(centRead.next(key, cent)){
 				tmp1 = new Center(cent.getX(), cent.getY(), cent.getZ());
+				Center tmpS = new Center(cent.getX(), cent.getY(), cent.getZ());
+				tmpS.sumCenter(tmp);
+				tmpS.incInstance();
+				tmpS.incInstance();
 				System.out.println("-------------------" + tmp1.toString());
+				System.out.println("------------------- SUM ----------" + tmpS.toString());
+				tmpS.mean();
+				System.out.println("------------------- SUM/MED ----------" + tmpS.toString());
 				System.out.println("------------------- DIST----------" + Center.distance(tmp, tmp1));
 				//centroids.add(tmp);
-			}
+			}*/
 
 
 
@@ -96,56 +103,73 @@ public class KMeanDriver {
 
 		//TODO
 		Configuration conf = new Configuration();
-		//System.out.println("111111111111111111111111111111111111111111111111111111111111111111111");
 
 		Path centers = new Path("centers/cent.seq");
 		Path input = new Path(args[0]);
-		//System.out.println("2222222222222222222222222222222222222222222222222222222222222222222222");
 		conf.set("centersPath", centers.toString());
 
 		JobClient my_client = new JobClient();
 		// Create a configuration object for the job
 		Job job_conf = Job.getInstance(conf, "KMeans");
 		job_conf.setJarByClass(KMeanDriver.class);
-		//System.out.println("3333333333333333333333333333333333333333333333333333333333333333333333");
 		createCenter(5, conf, input, centers);
 
 		// Set a name of the Job
 		//job_conf.setJobName("KMeans");
-		//System.out.println("44444444444444444444444444444444444444444444444444444444444444444444444");
 		// Specify data type of output key and value
 		job_conf.setOutputKeyClass(IntWritable.class);
 		job_conf.setOutputValueClass(Center.class);
-		//System.out.println("55555555555555555555555555555555555555555555555555555555555555555555555");
 		// Specify names of Mapper and Reducer Class
 		job_conf.setMapperClass(KMeanMapper.class);
 		job_conf.setCombinerClass(KMeanCombiner.class);
 		job_conf.setReducerClass(KMeanReducer.class);
-		//System.out.println("66666666666666666666666666666666666666666666666666666666666666666666666");
 		// Specify formats of the data type of Input and output
+		//job_conf.setNumReduceTasks(1);
+
+		job_conf.setOutputKeyClass(IntWritable.class);
+		job_conf.setOutputValueClass(Center.class);
 		
 		//job_conf.setInputFormat(TextInputFormat.class);
 		//job_conf.setOutputFormat(TextOutputFormat.class);
 		
-		//System.out.println("777777777777777777777777777777777777777777777777777777777777777777777777");
 		// Set input and output directories using command line arguments, 
 		//arg[0] = name of input directory on HDFS, and arg[1] =  name of output directory to be created to store the output file.
-		//System.out.println("88888888888888888888888888888888888888888888888888888888888888888888888888");
 		
 		FileInputFormat.setInputPaths(job_conf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job_conf, new Path(args[1]));
 		
 		job_conf.setMapOutputKeyClass(IntWritable.class);
 		job_conf.setMapOutputValueClass(Center.class);
-		//System.out.println("999999999999999999999999999999999999999999999999999999999999999999999999999");
 
 		
 		//my_client.setConf(job_conf);
-		//System.out.println("0000000000000000000000000000000000000000000000000000000000000000000000000000");
 		try {
 			// Run the job 
 			//JobClient.runJob(job_conf);
 			job_conf.waitForCompletion(true);
+
+
+
+
+			System.out.println("------------------- L E T T U R A    F I L E S E Q  AGGIORNATO-------------------");
+
+
+
+
+
+			SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
+			IntWritable key = new IntWritable();
+			Center cent = new Center();
+			Center tmp1;
+			System.out.println("++++++++++++++++++++++");
+			while(centRead.next(key, cent)){
+				tmp1 = new Center(cent.getX(), cent.getY(), cent.getZ());
+				System.out.println("----------"+key.toString()+"---------" + tmp1.toString());
+				//centroids.add(tmp);
+			}
+
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
