@@ -31,7 +31,6 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 		}
 
 		//valueSum.setInstance(l);
-
 		Centri.put(new IntWritable(iKey),valueSum);
 
 		context.write(key, valueSum);

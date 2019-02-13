@@ -21,7 +21,7 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 
 
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
-		/*int iKey = key.get();
+		int iKey = key.get();
 		Center newCenter = new Center();
 		for(Center c : values) {
 			// replace type of value with the actual type of our value
@@ -30,16 +30,16 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 			newCenter.addInstance(c);
 		}
 
-		//newCenter.mean();
+		newCenter.mean();
 
 		Centri.put(new IntWritable(iKey), newCenter);
 
-		context.write(new IntWritable(iKey), newCenter);*/
+		context.write(new IntWritable(iKey), newCenter);
 	}
 
 	@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException{
-/*
+
 		Configuration conf = context.getConfiguration();
 		Path centers = new Path(conf.get("centersPath"));
 		FileSystem fs = FileSystem.get(conf);
@@ -56,6 +56,6 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 			centersFile.append(cent.getKey(), cent.getValue());
 		}
 		centersFile.close();
-	*/
+	
 	}
 }
