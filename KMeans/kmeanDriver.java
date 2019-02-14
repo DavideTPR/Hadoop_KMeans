@@ -5,9 +5,9 @@ package KMean;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileOutputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.File;
+import java.util.Vector;
 
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
@@ -27,7 +27,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 public class KMeanDriver {
 
 
-	private static void createCenter(int k, Configuration conf, Path input, Path centers){
+	private static void createCenter(int k, Configuration conf, Path input, Path centers, Vector<Integer> index){
 	
 		try {
 			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
@@ -42,24 +42,55 @@ public class KMeanDriver {
 				System.out.println(i + "-------------------------------------" + ri[i].getPath());
 			}*/
 
-			//Apro il dataset per estrapolare i centri iniziali, in questo caso le prima k righe 
+			//Apro il dataset per estrapolare i centri iniziali 
 			BufferedReader brData = new BufferedReader(new InputStreamReader(fs.open(ri[0].getPath())));
 			String line;
 			Center tmp=new Center();
 
-			for(int i=0; i<k; i++)
-			{
-				line = brData.readLine();
-				String[] data = line.split("\\t");
+			//Scelgo le prime k righe del dataset come centri
+			if(index == null){
 
-				//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
-				tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
-				System.out.println("-------------------" + tmp.toString());
-				centersFile.append(new IntWritable(i), tmp);
+				for(int i=0; i<k; i++){
+
+					line = brData.readLine();
+					String[] data = line.split("\\t");
+
+					//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
+					tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
+					System.out.println("-------------------" + tmp.toString());
+					centersFile.append(new IntWritable(i), tmp);
+				}
+
+				brData.close();
+				centersFile.close();
 			}
+			else{
+				int idx = 0;
+				int id = 0;
 
-			brData.close();
-			centersFile.close();
+				//se lindice attuale è quello nella lista dei centri allora salvo l'elemento come centro
+				while(!index.isEmpty()){
+
+					line = brData.readLine();
+
+					if(index.contains(idx)){
+						
+						String[] data = line.split("\\t");
+
+						//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
+						tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
+						System.out.println("-------------------" + tmp.toString());
+						centersFile.append(new IntWritable(id), tmp);
+						index.removeElement(idx);
+						id++;
+					}
+
+					idx++;
+				}
+
+				brData.close();
+				centersFile.close();
+			}
 
 
 
@@ -119,6 +150,12 @@ public class KMeanDriver {
 			int numCenters = Integer.parseInt(args[2]);
 			int loop = Integer.parseInt(args[3]);
 
+			Vector<Integer> index = new Vector<Integer>();
+			index.add(0);
+			index.add(71238);
+			index.add(117707);
+			index.add(165945);
+			index.add(311672);
 
 
 			conf.set("centersPath", centers.toString());
@@ -128,7 +165,7 @@ public class KMeanDriver {
 
 			JobClient my_client = new JobClient();
 
-			createCenter(numCenters, conf, input, centers);
+			createCenter(numCenters, conf, input, centers, index);
 
 			for(int n = 0; n < loop; n++){
 
