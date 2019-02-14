@@ -17,7 +17,13 @@ hdfs dfs -get output_mean/part-r-00000
 
 hdfs dfs -get centers/cent.seq
 
+hdfs dfs -get centers/cent.txt
+
+hdfs dfs -get centers/cent_*.txt
+
 hdfs dfs -rm -r output_mean 
 
+hdfs dfs -rm -r centers
 
-$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean
+
+$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean 5 10

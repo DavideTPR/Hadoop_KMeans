@@ -13,6 +13,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.fs.FileSystem;
 
+import org.apache.hadoop.fs.FSDataOutputStream;
+
 public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Center> {
 
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
@@ -21,16 +23,19 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 
 		int iKey = key.get();
 
+		int count = 0;
+
 		Center valueSum = new Center();
 		for(Center c : values) {
 			// replace type of value with the actual type of our value
 			//Center v = (Center) values.next();
 			valueSum.sumCenter(c);
-			valueSum.incInstance();
+			//valueSum.incInstance();
+			count++;
 			
 		}
 
-		//valueSum.setInstance(l);
+		valueSum.setInstance(count);
 		Centri.put(new IntWritable(iKey),valueSum);
 
 		context.write(key, valueSum);
@@ -38,9 +43,14 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 
 
 
-	protected void cleanup(Context context) throws IOException, InterruptedException{
+	/*protected void cleanup(Context context) throws IOException, InterruptedException{
 		Configuration conf = context.getConfiguration();
 		Path centers = new Path(conf.get("centersPath"));
+
+		FileSystem fs = FileSystem.get(conf);
+		int tmp = conf.getInt("number", 0);
+		FSDataOutputStream fsdos = fs.create(new Path("centers/cent_"+ tmp +".txt"), true);
+
 		SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
 		Set set = Centri.entrySet();
 		Iterator newCenters = set.iterator();
@@ -48,7 +58,9 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 		while(newCenters.hasNext()){
 			Map.Entry cent = (Map.Entry)newCenters.next();
 			centersFile.append(cent.getKey(), cent.getValue());
+			fsdos.writeChars("-" + cent.getKey().toString() + " : " + cent.getValue().toString() + "\n");
 		}
+		fsdos.close();
 		centersFile.close();
-	}
+	}*/
 }

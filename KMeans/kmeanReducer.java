@@ -15,6 +15,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.fs.FileSystem;
 
+
+import org.apache.hadoop.fs.FSDataOutputStream;
+import java.io.FileOutputStream;
+
 public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
 
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
@@ -37,7 +41,7 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 		context.write(new IntWritable(iKey), newCenter);
 	}
 
-	@Override
+	//@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException{
 
 		Configuration conf = context.getConfiguration();
@@ -45,6 +49,8 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 		FileSystem fs = FileSystem.get(conf);
         fs.delete(centers, true);
 
+		//int tmp = conf.getInt("number", 0);
+		//FSDataOutputStream fsdos = fs.create(new Path("centers/cent_"+ tmp +".txt"), true);
 
 		SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
 		
@@ -54,7 +60,9 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 		while(newCenters.hasNext()){
 			Map.Entry cent = (Map.Entry)newCenters.next();
 			centersFile.append(cent.getKey(), cent.getValue());
+			//fsdos.writeChars("-" + cent.getKey().toString() + " : " + cent.getValue().toString() + "\n");
 		}
+		//fsdos.close();
 		centersFile.close();
 	
 	}

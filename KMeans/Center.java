@@ -56,6 +56,10 @@ public class Center extends Element{
        return instanceNum.get();
     }
 
+    public void setInstance(double n){
+        this.instanceNum = new DoubleWritable(n);
+     }
+
     public void addInstance(Center c){
         this.instanceNum.set(this.instanceNum.get() + c.getInstance());
     }
