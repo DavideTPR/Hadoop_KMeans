@@ -26,4 +26,4 @@ hdfs dfs -rm -r output_mean
 hdfs dfs -rm -r centers
 
 
-$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean 5 10
+$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean 5 10 311704

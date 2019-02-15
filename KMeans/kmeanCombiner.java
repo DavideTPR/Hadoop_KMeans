@@ -17,26 +17,37 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 
 public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Center> {
 
-	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
+	//HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
 
 		int iKey = key.get();
 
-		int count = 0;
+		double count = 0;
+		double x = 0;
+		double y = 0;
+		double z = 0;
 
-		Center valueSum = new Center();
+		//Center valueSum = new Center();
 		for(Center c : values) {
 			// replace type of value with the actual type of our value
 			//Center v = (Center) values.next();
-			valueSum.sumCenter(c);
+			
+			//valueSum.sumCenter(c);
+			
 			//valueSum.incInstance();
+
+			x += c.getX();
+			y += c.getY();
+			z += c.getZ();
+
+
 			count++;
 			
 		}
 
-		valueSum.setInstance(count);
-		Centri.put(new IntWritable(iKey),valueSum);
+		Center valueSum = new Center(x, y, z, count);
+		//Centri.put(new IntWritable(iKey),valueSum);
 
 		context.write(key, valueSum);
 	}

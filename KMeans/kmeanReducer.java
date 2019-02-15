@@ -26,14 +26,28 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
 		int iKey = key.get();
-		Center newCenter = new Center();
+		//Center newCenter = new Center();
+
+		double count = 0;
+		double x = 0;
+		double y = 0;
+		double z = 0;
+
 		for(Center c : values) {
 			// replace type of value with the actual type of our value
 			//Center value = (Center) values.next();
-			newCenter.sumCenter(c);
-			newCenter.addInstance(c);
+			//newCenter.sumCenter(c);
+
+			x += c.getX();
+			y += c.getY();
+			z += c.getZ();
+
+			count += c.instanceNum.get();
+
+			//newCenter.addInstance(c);
 		}
 
+		Center newCenter = new Center(x, y, z, count);
 		newCenter.mean();
 
 		Centri.put(new IntWritable(iKey), newCenter);

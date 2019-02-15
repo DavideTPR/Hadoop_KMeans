@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.File;
 import java.util.Vector;
+import java.lang.Math;
 
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
@@ -27,7 +28,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 public class KMeanDriver {
 
 
-	private static void createCenter(int k, Configuration conf, Path input, Path centers, Vector<Integer> index){
+	private static void createCenter(int k, Configuration conf, Path input, Path centers, Vector<Integer> index, int maxNumber){
 	
 		try {
 			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
@@ -48,7 +49,7 @@ public class KMeanDriver {
 			Center tmp=new Center();
 
 			//Scelgo le prime k righe del dataset come centri
-			if(index == null){
+			if(index == null && maxNumber == 0){
 
 				for(int i=0; i<k; i++){
 
@@ -61,37 +62,78 @@ public class KMeanDriver {
 					centersFile.append(new IntWritable(i), tmp);
 				}
 
-				brData.close();
-				centersFile.close();
+				//brData.close();
+				//centersFile.close();
 			}
-			else{
-				int idx = 0;
-				int id = 0;
+			else
+				if (maxNumber == 0){
+					int idx = 0;
+					int id = 0;
 
-				//se lindice attuale è quello nella lista dei centri allora salvo l'elemento come centro
-				while(!index.isEmpty()){
+					//se lindice attuale è quello nella lista dei centri allora salvo l'elemento come centro
+					while(!index.isEmpty()){
 
-					line = brData.readLine();
+						line = brData.readLine();
 
-					if(index.contains(idx)){
-						
-						String[] data = line.split("\\t");
+						if(index.contains(idx)){
+							
+							String[] data = line.split("\\t");
 
-						//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
-						tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
-						System.out.println("-------------------" + tmp.toString());
-						centersFile.append(new IntWritable(id), tmp);
-						index.removeElement(idx);
-						id++;
+							//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
+							tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
+							System.out.println("-------------------" + tmp.toString());
+							centersFile.append(new IntWritable(id), tmp);
+							index.removeElement(idx);
+							id++;
+						}
+
+						idx++;
 					}
 
-					idx++;
+					//brData.close();
+					//centersFile.close();
+				}
+				else{
+					Vector<Integer> cent = new Vector<Integer>();
+					int n = 0;
+					int idx = 0;
+					int id = 0;
+
+					for(int i=0; i<k; i++){
+						//do {
+							n = (int)(Math.random()*(maxNumber-1));
+						//} while (!cent.contains(n));
+						cent.add(n);
+					}
+
+
+					while(!cent.isEmpty()){
+
+						line = brData.readLine();
+
+						if(cent.contains(idx)){
+							
+							String[] data = line.split("\\t");
+
+							//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
+							tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
+							System.out.println("-------------------" + tmp.toString());
+							centersFile.append(new IntWritable(id), tmp);
+							cent.removeElement(idx);
+							id++;
+						}
+
+						idx++;
+					}
+
+					//brData.close();
+					//centersFile.close();
+
+
 				}
 
-				brData.close();
-				centersFile.close();
-			}
-
+			brData.close();
+			centersFile.close();
 
 
 
@@ -136,9 +178,9 @@ public class KMeanDriver {
 
 	public static void main(String[] args) throws Exception {
 
-		if(args.length != 4){
+		if(args.length != 5){
 			System.out.println("- USE:");
-			System.out.println("$HADOOP_HOME/bin/hadoop jar KMeans.jar input_dir output_dir number_centers loop");
+			System.out.println("$HADOOP_HOME/bin/hadoop jar KMeans.jar input_dir output_dir number_centers loop max_line_num");
 		}
 		else{
 			Configuration conf = new Configuration();
@@ -149,6 +191,7 @@ public class KMeanDriver {
 			Path output = new Path(args[1]);
 			int numCenters = Integer.parseInt(args[2]);
 			int loop = Integer.parseInt(args[3]);
+			int maxNum = Integer.parseInt(args[4]);
 
 			Vector<Integer> index = new Vector<Integer>();
 			index.add(0);
@@ -165,7 +208,7 @@ public class KMeanDriver {
 
 			JobClient my_client = new JobClient();
 
-			createCenter(numCenters, conf, input, centers, index);
+			createCenter(numCenters, conf, input, centers, index, maxNum);
 
 			for(int n = 0; n < loop; n++){
 

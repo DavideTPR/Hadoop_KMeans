@@ -28,12 +28,17 @@ public class Center extends Element{
         this.instanceNum = new DoubleWritable(1);
     }
 
+    public Center(double c1, double c2, double c3, double iNum){
+        super(c1, c2, c3);
+        this.instanceNum = new DoubleWritable(iNum);
+    }
+
 
     public void sumCenter(Center c){
         this.x.set(this.x.get() + c.x.get());
         this.y.set(this.y.get() + c.y.get());
         this.z.set(this.z.get() + c.z.get());
-        incInstance();
+        //incInstance();
     }
 
     public void mean(){
@@ -44,7 +49,7 @@ public class Center extends Element{
     }
 
     public String toString(){
-        return this.x.get() + " - " + this.y.get() + " - " + this.z.get()/* + " ---- " + this.getInstance()*/;
+        return this.x.get() + " - " + this.y.get() + " - " + this.z.get() + " ---- " + this.getInstance();
     }
 
     public void incInstance(){

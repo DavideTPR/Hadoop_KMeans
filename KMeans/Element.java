@@ -68,4 +68,18 @@ public class Element implements WritableComparable<Center>{
         return this.z.get();
     }
 
+
+    public void setX(double x){
+         this.x = new DoubleWritable(x);
+    }
+
+    public void setY(double y){
+         this.y = new DoubleWritable(y);
+    }
+
+    public void setZ(double z){
+         this.z = new DoubleWritable(z);
+    }
+
+
 }
