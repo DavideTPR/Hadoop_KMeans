@@ -5,6 +5,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import java.util.ArrayList;
+
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 
@@ -24,11 +26,14 @@ public class Element implements WritableComparable<Center>{
      * coordinata centro
      */
     protected DoubleWritable z;
+
+    protected ArrayList<DoubleWritable> parameters;
     
     public Element(){
-        this.x = new DoubleWritable(0);
+        /*this.x = new DoubleWritable(0);
         this.y = new DoubleWritable(0);
-        this.z = new DoubleWritable(0);
+        this.z = new DoubleWritable(0);*/
+        parameters = new ArrayList<DoubleWritable>();
     }
 
     public Element(double c1, double c2, double c3){
@@ -37,18 +42,45 @@ public class Element implements WritableComparable<Center>{
         this.z = new DoubleWritable(c3);
     }
 
+
+    public Element(int size){
+        parameters = new ArrayList<DoubleWritable>();
+        for(int i = 0 ; i < size; i++){
+            parameters.add(new DoubleWritable(0));
+        }
+
+    }
+
+    public Element(ArrayList<DoubleWritable> param){
+        parameters = new ArrayList<DoubleWritable>();
+
+        for(DoubleWritable d : param){
+            parameters.add(d);
+        }
+    }
+
     public void readFields(DataInput dataInput) throws IOException {
 
-        this.x = new DoubleWritable(dataInput.readDouble());
+        /*this.x = new DoubleWritable(dataInput.readDouble());
         this.y = new DoubleWritable(dataInput.readDouble());
-        this.z = new DoubleWritable(dataInput.readDouble());
+        this.z = new DoubleWritable(dataInput.readDouble());*/
+        int size = dataInput.readInt();
+        parameters = new ArrayList<DoubleWritable>();
+        
+        for(int i = 0; i < size; i++){
+            parameters.add(new DoubleWritable(dataInput.readDouble()));
+        }
     }
 
     public void write(DataOutput dataOutput) throws IOException {
 
-        dataOutput.writeDouble(this.getX());
+        /*dataOutput.writeDouble(this.getX());
         dataOutput.writeDouble(this.getY());
-        dataOutput.writeDouble(this.getZ());
+        dataOutput.writeDouble(this.getZ());*/
+        dataOutput.writeInt(parameters.size());
+        for(int i = 0; i < parameters.size(); i++){
+            dataOutput.writeDouble(parameters.get(i).get());
+        }
 
     }
 
@@ -66,6 +98,14 @@ public class Element implements WritableComparable<Center>{
 
     public double getZ(){
         return this.z.get();
+    }
+
+    public ArrayList<DoubleWritable> getParam(){
+        return parameters;
+    }
+
+    public void addParam(double d){
+        parameters.add(new DoubleWritable(d));
     }
 
 

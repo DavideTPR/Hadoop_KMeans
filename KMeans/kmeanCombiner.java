@@ -3,6 +3,7 @@ package KMean;
 import java.io.IOException;
 import java.util.*;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -12,6 +13,7 @@ import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.DoubleWritable;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 
@@ -23,10 +25,17 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 
 		int iKey = key.get();
 
+		Configuration conf = context.getConfiguration();
+		int size = conf.getInt("numParams", 3);
+
 		double count = 0;
 		double x = 0;
 		double y = 0;
 		double z = 0;
+		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
+        for(int i = 0 ; i < size; i++){
+            value.add(new DoubleWritable(0));
+        }
 
 		//Center valueSum = new Center();
 		for(Center c : values) {
@@ -37,16 +46,20 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 			
 			//valueSum.incInstance();
 
-			x += c.getX();
+			/*x += c.getX();
 			y += c.getY();
-			z += c.getZ();
+			z += c.getZ();*/
+
+			for(int i = 0; i < size; i++){
+				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
+			}
 
 
 			count++;
 			
 		}
 
-		Center valueSum = new Center(x, y, z, count);
+		Center valueSum = new Center(value, count);
 		//Centri.put(new IntWritable(iKey),valueSum);
 
 		context.write(key, valueSum);

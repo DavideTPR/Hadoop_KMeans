@@ -14,6 +14,7 @@ import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.DoubleWritable;
 
 
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -27,27 +28,33 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
 		int iKey = key.get();
 		//Center newCenter = new Center();
+		Configuration conf = context.getConfiguration();
+		int size = conf.getInt("numParams", 3);
 
 		double count = 0;
 		double x = 0;
 		double y = 0;
 		double z = 0;
+		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
+        for(int i = 0 ; i < size; i++){
+            value.add(new DoubleWritable(0));
+        }
 
 		for(Center c : values) {
 			// replace type of value with the actual type of our value
 			//Center value = (Center) values.next();
 			//newCenter.sumCenter(c);
 
-			x += c.getX();
-			y += c.getY();
-			z += c.getZ();
+			for(int i = 0; i < size; i++){
+				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
+			}
 
 			count += c.instanceNum.get();
 
 			//newCenter.addInstance(c);
 		}
 
-		Center newCenter = new Center(x, y, z, count);
+		Center newCenter = new Center(value, count);
 		newCenter.mean();
 
 		Centri.put(new IntWritable(iKey), newCenter);

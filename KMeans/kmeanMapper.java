@@ -10,6 +10,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.DoubleWritable;
 //import org.apache.hadoop.mapreduce.Mapper.Context;
 //import org.apache.log4j.Logger;
 
@@ -37,7 +38,7 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		
 		//leggo il file contenente i centri e inizializzo centroids
 		while(centRead.next(key, cent)){
-			Center tmp = new Center(cent.getX(), cent.getY(), cent.getZ());
+			Center tmp = new Center(cent.getParam());
 			//logger.fatal(tmp.toString());
 			centroids.add(tmp);
 		}
@@ -56,12 +57,18 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		Center cent;
 		IntWritable idx;
 
+		Configuration conf = context.getConfiguration();
+		int size = conf.getInt("numParams", 3);
 		String valueString = value.toString();
 		//split string containing TAB
 		String[] SingleData = valueString.split("\\t"); // or \\t
 
 
-		element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
+		//element = new Center(Double.parseDouble(SingleData[0]), Double.parseDouble(SingleData[1]), Double.parseDouble(SingleData[2]));
+		element= new Center();
+		for(int n = 0; n < size; n++){
+			element.addParam(Double.parseDouble(SingleData[n]));
+		}
 
 		/*for(int i = 0; i < centroids.size(); i++){
 			dis = Center.distance(centroids.get(i), element);
