@@ -10,8 +10,14 @@ import org.apache.hadoop.io.DoubleWritable;
 
 public class Center extends Element{
 
+    /**
+     * numero di elementi di un determinato centro
+     */
     public DoubleWritable instanceNum;
     
+    /**
+     * Calcolo della distanza euclidea tra c1 e c2
+     */
     public static double distance(Center c1, Center c2) {
         double res = 0;
         //Math.pow((c1.getX() - c2.getX()), 2)
@@ -21,6 +27,10 @@ public class Center extends Element{
 
         return Math.sqrt(res);
     }
+
+    /**
+     * Calcolo della distanza euclidea tra c1 e c2
+     */
     public static double distance(Center c1, Element c2) {
         double res = 0;
         //Math.pow((c1.getX() - c2.getX()), 2)
@@ -31,46 +41,46 @@ public class Center extends Element{
         return Math.sqrt(res);
     }
     
+    /**
+     * Costruttore base
+     */
     public Center(){
         super();
         this.instanceNum = new DoubleWritable(1);
     }
 
-    /*public Center(double c1, double c2, double c3){
-        super(c1, c2, c3);
-        this.instanceNum = new DoubleWritable(1);
-    }
-
-    public Center(double c1, double c2, double c3, double iNum){
-        super(c1, c2, c3);
-        this.instanceNum = new DoubleWritable(iNum);
-    }*/
-
+    /**
+     * Inizializza i parametri
+     */
     public Center(ArrayList<DoubleWritable> param){
         super(param);
         this.instanceNum = new DoubleWritable(1);
     }
 
+    /**
+     * Inizializza i parametri e il numero di elementi
+     */
     public Center(ArrayList<DoubleWritable> param, double iNum){
         super(param);
         this.instanceNum = new DoubleWritable(iNum);
     }
 
-    public void sumCenter(Center c){
+
+    /*public void sumCenter(Center c){
         this.x.set(this.x.get() + c.x.get());
         this.y.set(this.y.get() + c.y.get());
         this.z.set(this.z.get() + c.z.get());
         //incInstance();
-    }
+    }*/
 
+    /**
+     * Calcola la media dei parametri
+     */
     public void mean(){
-        /*this.x.set(this.x.get() / this.getInstance());
-        this.y.set(this.y.get() / this.getInstance());
-        this.z.set(this.z.get() / this.getInstance());*/
         for(int i = 0; i < parameters.size(); i++){
             parameters.get(i).set(parameters.get(i).get() / this.getInstance());
         }
-        //this.instanceNum.set(1);
+        this.instanceNum.set(1);
     }
 
     public String toString(){
@@ -82,8 +92,8 @@ public class Center extends Element{
             }
         }
 
-        s += " ---- " + this.getInstance();
-        return s; //this.x.get() + " - " + this.y.get() + " - " + this.z.get() + " ---- " + this.getInstance();
+        //s += " ---- " + this.getInstance();
+        return s;
     }
 
     public void incInstance(){

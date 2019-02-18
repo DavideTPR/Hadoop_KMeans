@@ -29,38 +29,25 @@ public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Cen
 		int size = conf.getInt("numParams", 3);
 
 		double count = 0;
-		double x = 0;
-		double y = 0;
-		double z = 0;
 		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
+		
         for(int i = 0 ; i < size; i++){
             value.add(new DoubleWritable(0));
         }
 
 		//Center valueSum = new Center();
 		for(Center c : values) {
-			// replace type of value with the actual type of our value
-			//Center v = (Center) values.next();
-			
-			//valueSum.sumCenter(c);
-			
-			//valueSum.incInstance();
-
-			/*x += c.getX();
-			y += c.getY();
-			z += c.getZ();*/
-
+			//Somma parziale dei parametri di tutti gli elemnti appartenenti ad uno stesso centro
 			for(int i = 0; i < size; i++){
 				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
 			}
 
-
+			//aumento il numero di elementi appartenenti a quel centro
 			count++;
 			
 		}
 
 		Center valueSum = new Center(value, count);
-		//Centri.put(new IntWritable(iKey),valueSum);
 
 		context.write(key, valueSum);
 	}

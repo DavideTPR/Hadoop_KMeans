@@ -38,22 +38,17 @@ public class KMeanDriver {
 			FileSystem fs = FileSystem.get(conf);
 			FileStatus[] ri = fs.listStatus(input);
 
-			//SequenceFile.Writer centersFile = new SequenceFile.Writer(fs, conf, centers, IntWritable.class, Center.class);
-
-			/*for (int i = 0; i < ri.length; i++) {
-				System.out.println(i + "-------------------------------------" + ri[i].getPath());
-			}*/
-
 			//Apro il dataset per estrapolare i centri iniziali 
 			BufferedReader brData = new BufferedReader(new InputStreamReader(fs.open(ri[0].getPath())));
 			String line;
 			Center tmp=new Center();
 
-			//Scelgo le prime k righe del dataset come centri
+			//Scelta dei centri in base alla infromazioni fornite alla funzione
 			if(index == null && maxNumber == 0){
-
+				//Scelgo le prime k righe del dataset come centri
 				for(int i=0; i<k; i++){
 
+					//leggo una riga e la suddivido in base al carattere
 					line = brData.readLine();
 					String[] data = line.split("\\t");
 
@@ -66,9 +61,6 @@ public class KMeanDriver {
 					System.out.println("-------------------" + tmp.toString());
 					centersFile.append(new IntWritable(i), tmp);
 				}
-
-				//brData.close();
-				//centersFile.close();
 			}
 			else
 				if (maxNumber == 0){
@@ -78,8 +70,10 @@ public class KMeanDriver {
 					//se lindice attuale è quello nella lista dei centri allora salvo l'elemento come centro
 					while(!index.isEmpty()){
 
+						//leggo una riga
 						line = brData.readLine();
 
+						//se l'indice è tra quelli indicati aggiungo il records ai centri
 						if(index.contains(idx)){
 							
 							String[] data = line.split("\\t");
@@ -98,8 +92,6 @@ public class KMeanDriver {
 						idx++;
 					}
 
-					//brData.close();
-					//centersFile.close();
 				}
 				else{
 					Vector<Integer> cent = new Vector<Integer>();
@@ -107,50 +99,42 @@ public class KMeanDriver {
 					int idx = 0;
 					int id = 0;
 
+					//creo k numeri casuali diversi tra loro
 					for(int i=0; i<k; i++){
 						do {
 							n = (int)(Math.random()*(maxNumber-1));
-						} while (!cent.contains(n));
+						} while (cent.contains(n));
 						cent.add(n);
 					}
 
-
+					//aggiungo i centri confrontando l'indice attuale con quello scelto
+					//mi fermo quando ho selezionato tutti i centri
 					while(!cent.isEmpty()){
 
-						System.out.println("---ZZZZZZZZZZZZZZZZZZZZZZZZ   ");
 						line = brData.readLine();
-						System.out.println("---KKKKKKKKKKKKKKKKKKKKKKKK   ");
+						
 						if(cent.contains(idx)){
-							System.out.println("---111111111111111111111111   ");
+							
 							String[] data = line.split("\\t");
-							System.out.println("---222222222222222222222222   ");
+							
 							//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
-							System.out.println("---333333333333333333333333   ");
 							tmp = new Center();
-							System.out.println("---444444444444444444444444   ");
 							for(int l = 0; l < param; l++){
-								System.out.println("+++++++++++++++++++++++AAAAA   " + l);
 								tmp.addParam(Double.parseDouble(data[l]));
-								System.out.println("+++++++++++++++++++++++BBBBB   " + l);
 							}
 							System.out.println("-------------------" + tmp.toString());
-							System.out.println("---555555555555555555555555   ");
 							centersFile.append(new IntWritable(id), tmp);
-							System.out.println("---666666666666666666666666   ");
+							//rimuovo il centro perchè selezionato
 							cent.removeElement(idx);
-							System.out.println("---777777777777777777777777   ");
+							
 							id++;
 						}
 
 						idx++;
 					}
-
-					//brData.close();
-					//centersFile.close();
-
-
 				}
 
+			//chiudo il sequence file e il file del dataset
 			brData.close();
 			centersFile.close();
 
@@ -198,20 +182,30 @@ public class KMeanDriver {
 	public static void main(String[] args) throws Exception {
 
 		if(args.length != 6){
+			//controllo per mostrare l'uso del programma
 			System.out.println("- USE:");
 			System.out.println("$HADOOP_HOME/bin/hadoop jar KMeans.jar input_dir output_dir number_centers number_parameters loop max_line_num");
 		}
 		else{
 			Configuration conf = new Configuration();
 
+			//file sequenziale centri
 			Path centers = new Path("centers/cent.seq");
+			//file di testo dei centri finali
 			Path centersTxt = new Path("centers/cent.txt");
+			//percorso in cui è situato l'input
 			Path input = new Path(args[0]);
+			//percorso in cui è situato l'output
 			Path output = new Path(args[1]);
+			//numeri di centri che si vogliono usare
 			int numCenters = Integer.parseInt(args[2]);
+			//numero di parametri da usare durante il calcolo
 			int numParams = Integer.parseInt(args[3]);
+			//numero di cicli per eseguire il calcolo
 			int loop = Integer.parseInt(args[4]);
+			//valore massimo per la scelta casuale dei centri
 			int maxNum = Integer.parseInt(args[5]);
+
 
 			Vector<Integer> index = new Vector<Integer>();
 			index.add(0);
@@ -220,7 +214,7 @@ public class KMeanDriver {
 			index.add(165945);
 			index.add(311672);
 
-
+			//imposto i parametri nella configurazione per usarli nel Mapper, nel Reducer e nel Combiner
 			conf.set("centersPath", centers.toString());
 			conf.setInt("numParams", numParams);
 
@@ -229,6 +223,7 @@ public class KMeanDriver {
 
 			JobClient my_client = new JobClient();
 
+			//creo i centri
 			createCenter(numCenters, numParams, conf, input, centers, null, maxNum);
 
 			for(int n = 0; n < loop; n++){
@@ -243,24 +238,22 @@ public class KMeanDriver {
 				job_conf.setOutputKeyClass(IntWritable.class);
 				job_conf.setOutputValueClass(Center.class);
 
-				// Specify names of Mapper and Reducer Class
+				// Specify names of Mapper, Combiner and Reducer Class
 				job_conf.setMapperClass(KMeanMapper.class);
 				job_conf.setCombinerClass(KMeanCombiner.class);
 				job_conf.setReducerClass(KMeanReducer.class);
 
 				//job_conf.setNumReduceTasks(1);
-
-				// Specify formats of the data type of Input and output
-				//job_conf.setOutputKeyClass(IntWritable.class);
-				//job_conf.setOutputValueClass(Center.class);
-
 				
+				//imposto i percorsi di input e output
 				FileInputFormat.setInputPaths(job_conf, input);
 				FileOutputFormat.setOutputPath(job_conf, output);
 				
+				//imposto i valori di uscita del mapper
 				job_conf.setMapOutputKeyClass(IntWritable.class);
 				job_conf.setMapOutputValueClass(Center.class);
 
+				//eseguo il job
 				job_conf.waitForCompletion(true);
 
 				//elimino l'output per poter rieseguire
@@ -282,15 +275,9 @@ public class KMeanDriver {
 			job_conf.waitForCompletion(true);
 
 
-			//my_client.setConf(job_conf);
 			try {
-				// Run the job 
-				//JobClient.runJob(job_conf);
 				
-
-
-
-
+				//Stampo il risultato dei centri e creo un file di testo contenente il risultato leggibile
 				System.out.println("------------------- L E T T U R A    F I L E S E Q  AGGIORNATO-------------------");
 
 				

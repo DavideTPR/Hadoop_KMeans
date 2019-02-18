@@ -22,38 +22,34 @@ import java.io.FileOutputStream;
 
 public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
 
+	//Per salvare il centro calcolato e poterlo scrivere nel file sequenziale
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
 
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
+
 		int iKey = key.get();
-		//Center newCenter = new Center();
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
 
 		double count = 0;
-		double x = 0;
-		double y = 0;
-		double z = 0;
 		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
         for(int i = 0 ; i < size; i++){
             value.add(new DoubleWritable(0));
         }
 
 		for(Center c : values) {
-			// replace type of value with the actual type of our value
-			//Center value = (Center) values.next();
-			//newCenter.sumCenter(c);
-
+			//Somma parziale dei parametri di tutti gli elemnti appartenenti ad uno stesso centro
 			for(int i = 0; i < size; i++){
 				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
 			}
-
+			
+			//aumento il numero di elementi appartenenti a quel centro
 			count += c.instanceNum.get();
 
-			//newCenter.addInstance(c);
 		}
 
+		//calcolo la media per trovare il nuovo centro
 		Center newCenter = new Center(value, count);
 		newCenter.mean();
 
@@ -65,13 +61,12 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 	//@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException{
 
+		//Aggiorno il file sequenziale dei centri per l'esecuzione successiva
+
 		Configuration conf = context.getConfiguration();
 		Path centers = new Path(conf.get("centersPath"));
 		FileSystem fs = FileSystem.get(conf);
         fs.delete(centers, true);
-
-		//int tmp = conf.getInt("number", 0);
-		//FSDataOutputStream fsdos = fs.create(new Path("centers/cent_"+ tmp +".txt"), true);
 
 		SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
 		
@@ -81,9 +76,8 @@ public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Cent
 		while(newCenters.hasNext()){
 			Map.Entry cent = (Map.Entry)newCenters.next();
 			centersFile.append(cent.getKey(), cent.getValue());
-			//fsdos.writeChars("-" + cent.getKey().toString() + " : " + cent.getValue().toString() + "\n");
 		}
-		//fsdos.close();
+		
 		centersFile.close();
 	
 	}
