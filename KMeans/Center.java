@@ -1,4 +1,4 @@
-package KMean;
+package KMeans;
 
 import java.lang.Math;
 import java.io.DataInput;

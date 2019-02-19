@@ -1,4 +1,4 @@
-package KMean;
+package KMeans;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -15,7 +15,7 @@ import org.apache.hadoop.io.DoubleWritable;
 
 //import Center;
 
-public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
+public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 
 	//vettore dei centroidi
 	private static Vector<Center> centroids = new Vector<Center>();
@@ -48,7 +48,8 @@ public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
-		Center element;
+		Center element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
+										//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
 		Center cent;
 		IntWritable idx;
 
