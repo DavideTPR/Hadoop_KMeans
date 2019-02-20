@@ -1,10 +1,10 @@
-export CLASSPATH="$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.9.1.jar:$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.9.1.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.9.1.jar:~/KMeansProject/KMeans/*:$HADOOP_HOME/lib/*"
+export CLASSPATH="$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.9.1.jar:$HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.9.1.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.9.1.jar:~/KMeansProject/KMean/*:$HADOOP_HOME/lib/*"
 
 
-javac -d . Center.java Element.java KMeansMapper.java KMeansCombiner.java KMeansReducer.java KMeansDriver.java -Xlint
+javac -d . Center.java Element.java KMeanMapper.java KMeanCombiner.java KMeanReducer.java KMeanDriver.java -Xlint
 
 
-jar cfm KMeans.jar Manifest.txt KMeans/*.class
+jar cfm KMeans.jar Manifest.txt KMean/*.class
 
 
 hdfs dfs -mkdir kmeanDirectory
@@ -26,4 +26,4 @@ hdfs dfs -rm -r output_mean
 hdfs dfs -rm -r centers
 
 
-$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean 5 3 2 50 
+$HADOOP_HOME/bin/hadoop jar KMeans.jar kmeanDirectory output_mean 5 10 311704

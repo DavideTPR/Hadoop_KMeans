@@ -1,4 +1,4 @@
-package KMeans;
+package KMean;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -15,7 +15,11 @@ import org.apache.hadoop.io.DoubleWritable;
 
 //import Center;
 
+<<<<<<< HEAD:KMeans/KMeansMapper.java
 public class KMeansMapper extends Mapper<Object, Text, Center, Center> {
+=======
+public class KMeanMapper extends Mapper<Object, Text, IntWritable, Center> {
+>>>>>>> parent of 5adde21... V_3.5:KMeans/kmeanMapper.java
 
 	//vettore dei centroidi
 	private static Vector<Center> centroids = new Vector<Center>();
@@ -48,9 +52,14 @@ public class KMeansMapper extends Mapper<Object, Text, Center, Center> {
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
+<<<<<<< HEAD:KMeans/KMeansMapper.java
 		Center element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
 										//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
 		Center keyCenter = null;
+=======
+		Center element;
+		Center cent;
+>>>>>>> parent of 5adde21... V_3.5:KMeans/kmeanMapper.java
 		IntWritable idx;
 
 		Configuration conf = context.getConfiguration();

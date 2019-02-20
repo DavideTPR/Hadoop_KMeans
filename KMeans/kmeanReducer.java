@@ -1,4 +1,4 @@
-package KMeans;
+package KMean;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,7 +20,11 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import java.io.FileOutputStream;
 
+<<<<<<< HEAD:KMeans/KMeansReducer.java
 public class KMeansReducer extends Reducer<Center, Center, IntWritable, Center> {
+=======
+public class KMeanReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
+>>>>>>> parent of 5adde21... V_3.5:KMeans/kmeanReducer.java
 
 	//Per salvare il centro calcolato e poterlo scrivere nel file sequenziale
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();

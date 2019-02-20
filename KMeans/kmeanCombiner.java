@@ -1,4 +1,4 @@
-package KMeans;
+package KMean;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,7 +17,11 @@ import org.apache.hadoop.io.DoubleWritable;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 
+<<<<<<< HEAD:KMeans/KMeansCombiner.java
 public class KMeansCombiner extends Reducer<Center, Center, Center, Center> {
+=======
+public class KMeanCombiner extends Reducer<IntWritable, Center, IntWritable, Center> {
+>>>>>>> parent of 5adde21... V_3.5:KMeans/kmeanCombiner.java
 
 	//HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
