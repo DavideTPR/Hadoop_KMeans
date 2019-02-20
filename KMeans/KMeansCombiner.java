@@ -17,13 +17,13 @@ import org.apache.hadoop.io.DoubleWritable;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 
-public class KMeansCombiner extends Reducer<IntWritable, Center, IntWritable, Center> {
+public class KMeansCombiner extends Reducer<Center, Center, Center, Center> {
 
 	//HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
-	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
+	public void reduce(Center key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
 
-		int iKey = key.get();
+		//int iKey = key.get();
 
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
@@ -49,7 +49,7 @@ public class KMeansCombiner extends Reducer<IntWritable, Center, IntWritable, Ce
 
 		Center valueSum = new Center(value, count);
 
-		context.write(key, valueSum);
+		context.write(new Center(key.getParam(), key.getInstance(), key.getIndex()), valueSum);
 	}
 
 

@@ -20,15 +20,44 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import java.io.FileOutputStream;
 
-public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
+public class KMeansReducer extends Reducer<Center, Center, IntWritable, Center> {
 
 	//Per salvare il centro calcolato e poterlo scrivere nel file sequenziale
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
+	public enum convergence{
+		conv
+	}
+	
+	//vettore dei centroidi
+	/*private static HashMap<IntWritable, Center> centroids = new HashMap<IntWritable, Center>();
 
-	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
+	@Override
+    protected void setup(Context context) throws IOException, InterruptedException 	{
+		
+    //configurazione del sistema
+		Configuration conf = context.getConfiguration();//new Configuration();
+		
+		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
+		Path centers = new Path(conf.get("centersPath"));
+		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
+		IntWritable key = new IntWritable();
+		Center cent = new Center();
+		
+		//leggo il file contenente i centri e inizializzo centroids
+		while(centRead.next(key, cent)){
+			Center tmp = new Center(cent.getParam());
+			centroids.put(key, tmp);
+		}
 
-		int iKey = key.get();
+		centRead.close();
+    }*/
+
+
+
+	public void reduce(Center key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
+
+		//int iKey = key.get();
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
 
@@ -50,12 +79,16 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 		}
 
 		//calcolo la media per trovare il nuovo centro
-		Center newCenter = new Center(value, count);
+		Center newCenter = new Center(value, count, key.getIndex());
 		newCenter.mean();
 
-		Centri.put(new IntWritable(iKey), newCenter);
+		if(Center.distance(key, newCenter) > 0.3){
+			context.getCounter(convergence.conv).increment(1);
+		}
 
-		context.write(new IntWritable(iKey), newCenter);
+		Centri.put(new IntWritable(key.getIndex()), newCenter);
+
+		context.write(new IntWritable(key.getIndex()), newCenter);
 	}
 
 	//@Override

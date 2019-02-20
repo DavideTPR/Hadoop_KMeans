@@ -15,7 +15,7 @@ import org.apache.hadoop.io.DoubleWritable;
 
 //import Center;
 
-public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
+public class KMeansMapper extends Mapper<Object, Text, Center, Center> {
 
 	//vettore dei centroidi
 	private static Vector<Center> centroids = new Vector<Center>();
@@ -50,7 +50,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		//Vector<double> instance;
 		Center element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
 										//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
-		Center cent;
+		Center keyCenter = null;
 		IntWritable idx;
 
 		Configuration conf = context.getConfiguration();
@@ -58,6 +58,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		String valueString = value.toString();
 		//split string containing TAB
 		String[] SingleData = valueString.split("\\t"); // or \\t
+		//String[] SingleData = valueString.split(",");
 
 		element= new Center();
 		for(int n = 0; n < size; n++){
@@ -73,7 +74,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 			
 			if(dis < minDis)
 			{
-				cent = c;
+				keyCenter = c;
 				minDis = dis;
 				index = i;
 			}
@@ -82,6 +83,6 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 
 		idx = new IntWritable(index);
 
-		context.write(idx, element);
+		context.write(keyCenter, element);
 	}
 }

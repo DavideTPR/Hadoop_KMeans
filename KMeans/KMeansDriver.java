@@ -51,6 +51,7 @@ public class KMeansDriver {
 					//leggo una riga e la suddivido in base al carattere
 					line = brData.readLine();
 					String[] data = line.split("\\t");
+					//String[] data = line.split(",");
 
 					//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 					//tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
@@ -58,6 +59,7 @@ public class KMeansDriver {
 					for(int l = 0; l < param; l++){
 						tmp.addParam(Double.parseDouble(data[l]));
 					}
+					tmp.setIndex(i);
 					System.out.println("-------------------" + tmp.toString());
 					centersFile.append(new IntWritable(i), tmp);
 				}
@@ -85,12 +87,14 @@ public class KMeansDriver {
 					if(cent.contains(idx)){
 						
 						String[] data = line.split("\\t");
+						//String[] data = line.split(",");
 						
 						//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 						tmp = new Center();
 						for(int l = 0; l < param; l++){
 							tmp.addParam(Double.parseDouble(data[l]));
 						}
+						tmp.setIndex(id);
 						System.out.println("-------------------" + tmp.toString());
 						centersFile.append(new IntWritable(id), tmp);
 						//rimuovo il centro perchè selezionato
@@ -175,6 +179,8 @@ public class KMeansDriver {
 			//valore massimo per la scelta casuale dei centri
 			int maxNum = Integer.parseInt(args[5]);
 
+			boolean converge = false;
+
 			//imposto i parametri nella configurazione per usarli nel Mapper, nel Reducer e nel Combiner
 			conf.set("centersPath", centers.toString());
 			conf.setInt("numParams", numParams);
@@ -188,6 +194,7 @@ public class KMeansDriver {
 			createCenter(numCenters, numParams, conf, input, centers, maxNum);
 
 			for(int n = 0; n < loop; n++){
+			//(!converge){
 
 				//conf.setInt("number", n);
 			
@@ -211,11 +218,18 @@ public class KMeansDriver {
 				FileOutputFormat.setOutputPath(job_conf, output);
 				
 				//imposto i valori di uscita del mapper
-				job_conf.setMapOutputKeyClass(IntWritable.class);
+				job_conf.setMapOutputKeyClass(Center.class);
 				job_conf.setMapOutputValueClass(Center.class);
 
 				//eseguo il job
 				job_conf.waitForCompletion(true);
+
+				if(job_conf.getCounters().findCounter(KMeansReducer.convergence.conv).getValue() <= 1){
+					converge = true;
+				}
+				System.out.println("---------------------------------------------------------------------------------");
+				System.out.println("-------------------"+ job_conf.getCounters().findCounter(KMeansReducer.convergence.conv).getValue() +"-------------------");
+				System.out.println("---------------------------------------------------------------------------------");
 
 				//elimino l'output per poter rieseguire
 				fs.delete(output, true);
@@ -230,7 +244,7 @@ public class KMeansDriver {
 			FileInputFormat.setInputPaths(job_conf, input);
 			FileOutputFormat.setOutputPath(job_conf, output);
 			
-			job_conf.setMapOutputKeyClass(IntWritable.class);
+			job_conf.setMapOutputKeyClass(Center.class);
 			job_conf.setMapOutputValueClass(Center.class);
 
 			job_conf.waitForCompletion(true);
