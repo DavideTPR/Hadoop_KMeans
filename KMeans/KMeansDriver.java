@@ -174,6 +174,12 @@ public class KMeansDriver {
 			int loop = Integer.parseInt(args[4]);
 			//valore massimo per la scelta casuale dei centri
 			int maxNum = Integer.parseInt(args[5]);
+			//convergenza dei centri
+			boolean converge = false;
+
+			if(loop != 0){
+				converge = true;
+			}
 
 			//imposto i parametri nella configurazione per usarli nel Mapper, nel Reducer e nel Combiner
 			conf.set("centersPath", centers.toString());
@@ -186,8 +192,10 @@ public class KMeansDriver {
 
 			//creo i centri
 			createCenter(numCenters, numParams, conf, input, centers, maxNum);
-
-			for(int n = 0; n < loop; n++){
+			int n = 0;
+			//for(int n = 0; n < loop; n++){
+			//while(!converge){
+			while((!converge) ||  (n < loop)){
 
 				//conf.setInt("number", n);
 			
@@ -217,8 +225,14 @@ public class KMeansDriver {
 				//eseguo il job
 				job_conf.waitForCompletion(true);
 
+				if(job_conf.getCounters().findCounter(KMeansReducer.CONVERGENCE.CONVERGE).getValue() == 0)
+				{
+					converge = true;
+				}
+
 				//elimino l'output per poter rieseguire
 				fs.delete(output, true);
+				n++;
 			}
 
 			//rieseguo solo il mapper per avere come output il dataset con gli assegnamenti ai rispettivi centri

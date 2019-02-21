@@ -25,6 +25,35 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 	//Per salvare il centro calcolato e poterlo scrivere nel file sequenziale
 	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
 
+	//vettore dei centroidi
+	private static Vector<Center> OldCenter = new Vector<Center>();
+
+	public enum CONVERGENCE{
+		CONVERGE
+	}
+
+
+	@Override
+	protected void setup(Context context) throws IOException, InterruptedException 	{
+		
+	//configurazione del sistema
+		Configuration conf = context.getConfiguration();//new Configuration();
+		
+		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
+		Path centers = new Path(conf.get("centersPath"));
+		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
+		IntWritable key = new IntWritable();
+		Center cent = new Center();
+		
+		//leggo il file contenente i centri e inizializzo centroids
+		while(centRead.next(key, cent)){
+			Center tmp = new Center(cent.getParam());
+			OldCenter.add(tmp);
+		}
+
+		centRead.close();
+	}
+
 
 	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
 
@@ -52,6 +81,11 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 		//calcolo la media per trovare il nuovo centro
 		Center newCenter = new Center(value, count);
 		newCenter.mean();
+
+		if(Center.distance(OldCenter.get(key.get()), newCenter) > 0.01)
+		{
+			context.getCounter(CONVERGENCE.CONVERGE).increment(1);
+		}
 
 		Centri.put(new IntWritable(iKey), newCenter);
 

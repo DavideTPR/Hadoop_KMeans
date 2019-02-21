@@ -21,7 +21,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 	private static Vector<Center> centroids = new Vector<Center>();
 
 	@Override
-    protected void setup(Context context) throws IOException, InterruptedException 	{
+  protected void setup(Context context) throws IOException, InterruptedException 	{
 		
     //configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
@@ -39,7 +39,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		}
 
 		centRead.close();
-    }
+  }
 
 		
 	public void map(Object key, Text value, Context context)throws IOException,InterruptedException {
