@@ -55,9 +55,10 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
+		String split = conf.get("split");
 		String valueString = value.toString();
 		//split string containing TAB
-		String[] SingleData = valueString.split("\\t"); // or \\t
+		String[] SingleData = valueString.split(split); // or \\t
 
 		element= new Center();
 		for(int n = 0; n < size; n++){
