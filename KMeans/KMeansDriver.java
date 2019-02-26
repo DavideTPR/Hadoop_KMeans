@@ -29,7 +29,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 public class KMeansDriver {
 
 
-	private static void createCenter(int k, int param, Configuration conf, Path input, Path centers, int maxNumber){
+	private static void createCenter(int k, int param, Configuration conf, Path input, Path centers, int maxNumber, String split){
 	
 		try {
 			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
@@ -50,7 +50,7 @@ public class KMeansDriver {
 
 					//leggo una riga e la suddivido in base al carattere
 					line = brData.readLine();
-					String[] data = line.split("\\t");
+					String[] data = line.split(split);
 
 					//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 					//tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
@@ -84,7 +84,7 @@ public class KMeansDriver {
 					
 					if(cent.contains(idx)){
 						
-						String[] data = line.split("\\t");
+						String[] data = line.split(split);
 						
 						//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 						tmp = new Center();
@@ -150,10 +150,10 @@ public class KMeansDriver {
 
 	public static void main(String[] args) throws Exception {
 
-		if(args.length != 6){
+		if(args.length != 7){
 			//controllo per mostrare l'uso del programma
 			System.out.println("- USE:");
-			System.out.println("$HADOOP_HOME/bin/hadoop jar KMeans.jar input_dir output_dir number_centers number_parameters loop max_line_num");
+			System.out.println("$HADOOP_HOME/bin/hadoop jar KMeans.jar input_dir output_dir number_centers number_parameters loop max_line_num split_char");
 		}
 		else{
 			Configuration conf = new Configuration();
@@ -174,16 +174,23 @@ public class KMeansDriver {
 			int loop = Integer.parseInt(args[4]);
 			//valore massimo per la scelta casuale dei centri
 			int maxNum = Integer.parseInt(args[5]);
+			//carattere per dividere i parametri delle stringhe
+			String split = args[6];
 			//convergenza dei centri
 			boolean converge = false;
 
 			if(loop != 0){
 				converge = true;
 			}
+			System.out.println("++++++++++++++++++++++" + split);
+			if(split.equals("t")){
+				split = "\\t";
+			}
 
 			//imposto i parametri nella configurazione per usarli nel Mapper, nel Reducer e nel Combiner
 			conf.set("centersPath", centers.toString());
 			conf.setInt("numParams", numParams);
+			conf.set("split", split);
 
 
 			FileSystem fs = FileSystem.get(conf);
@@ -191,7 +198,7 @@ public class KMeansDriver {
 			JobClient my_client = new JobClient();
 
 			//creo i centri
-			createCenter(numCenters, numParams, conf, input, centers, maxNum);
+			createCenter(numCenters, numParams, conf, input, centers, maxNum, split);
 			int n = 0;
 			//for(int n = 0; n < loop; n++){
 			//while(!converge){
@@ -253,7 +260,7 @@ public class KMeansDriver {
 			try {
 				
 				//Stampo il risultato dei centri e creo un file di testo contenente il risultato leggibile
-				System.out.println("------------------- L E T T U R A    F I L E S E Q  AGGIORNATO-------------------");
+				System.out.println("------------------- L E T T U R A    F I L E S E Q    A G G I O R N A T O -------------------");
 
 				
 				//FileOutputStream fos = new FileOutputStream(/*new File(*/"centers/cent.txt"/*)*/, false);
