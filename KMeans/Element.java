@@ -17,6 +17,37 @@ public class Element implements WritableComparable<Center>{
     * Lista dei parametri degli elementi del dataset
     */
     protected ArrayList<DoubleWritable> parameters;
+
+        /**
+     * numero di elementi di un determinato centro
+     */
+    public DoubleWritable instanceNum;
+    
+    /**
+     * Calcolo della distanza euclidea tra c1 e c2
+     */
+    public static double distance(Center c1, Center c2) {
+        double res = 0;
+        //Math.pow((c1.getX() - c2.getX()), 2)
+        for(int i = 0;  i < c1.getParam().size(); i++){
+            res += Math.pow((c1.getParam().get(i).get() - c2.getParam().get(i).get()), 2);
+        }
+
+        return Math.sqrt(res);
+    }
+
+    /**
+     * Calcolo della distanza euclidea tra c1 e c2
+     */
+    public static double distance(Center c1, Element c2) {
+        double res = 0;
+        //Math.pow((c1.getX() - c2.getX()), 2)
+        for(int i = 0;  i < c1.getParam().size(); i++){
+            res += Math.pow((c1.getParam().get(i).get() - c2.getParam().get(i).get()), 2);
+        }
+
+        return Math.sqrt(res);
+    }
     
     /**
      * Costruttore base
