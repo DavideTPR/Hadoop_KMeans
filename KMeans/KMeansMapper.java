@@ -13,15 +13,13 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.DoubleWritable;
 
 
-//import Center;
-
-public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
+public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 
 	//vettore dei centroidi
-	private static Vector<Center> centroids = new Vector<Center>();
+	private static Vector<Element> centroids = new Vector<Element>();
 
 	@Override
-  protected void setup(Context context) throws IOException, InterruptedException 	{
+	protected void setup(Context context) throws IOException, InterruptedException {
 		
     //configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
@@ -30,16 +28,16 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		Path centers = new Path(conf.get("centersPath"));
 		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 		IntWritable key = new IntWritable();
-		Center cent = new Center();
+		Element cent = new Element();
 		
 		//leggo il file contenente i centri e inizializzo centroids
 		while(centRead.next(key, cent)){
-			Center tmp = new Center(cent.getParam());
+			Element tmp = new Element(cent.getParam());
 			centroids.add(tmp);
 		}
 
 		centRead.close();
-  }
+	}
 
 		
 	public void map(Object key, Text value, Context context)throws IOException,InterruptedException {
@@ -48,30 +46,33 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
-		Center element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
-										//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
-		Center cent;
+		Element element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
+							//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
+		Element cent;
 		IntWritable idx;
 
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
 		String split = conf.get("split");
 		String valueString = value.toString();
-		//split string containing TAB
+
+		//split della stringa in base al valore passato come parametro
 		String[] SingleData = valueString.split(split); // or \\t
 
-		element= new Center();
+		//creo e inizializzo l'elemento in base a ciò che è stato letto nel dataset
+		element= new Element();
 		for(int n = 0; n < size; n++){
 			element.addParam(Double.parseDouble(SingleData[n]));
 		}
 
 		int i = 0;
 		
-		for(Center c : centroids){
+		for(Element c : centroids){
 			
 			//calcolo la distanza da tutti i centri e lo assegno a quello più vicino
-			dis = Center.distance(c, element);
+			dis = Element.distance(c, element);
 			
+			//controllo se la distanza è la minore
 			if(dis < minDis)
 			{
 				cent = c;
@@ -82,7 +83,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Center> {
 		}
 
 		idx = new IntWritable(index);
-
+		//passo i valori al Combiner
 		context.write(idx, element);
 	}
 }

@@ -20,14 +20,21 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import java.io.FileOutputStream;
 
-public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Center> {
+public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, Element> {
 
-	//Per salvare il centro calcolato e poterlo scrivere nel file sequenziale
-	HashMap<IntWritable, Center> Centri = new HashMap<IntWritable, Center>();
+	/**
+	 * Mappa per salvare il centro calcolato e poterlo scrivere nel file sequenziale
+	 */
+	HashMap<IntWritable, Element> Centri = new HashMap<IntWritable, Element>();
 
-	//vettore dei centroidi
-	private static Vector<Center> OldCenter = new Vector<Center>();
+	/**
+	 * Vettore dei centroidi
+	 */
+	private static Vector<Element> OldCenter = new Vector<Element>();
 
+	/**
+	 * Utilizzato per valutare la convergenza
+	 */
 	public enum CONVERGENCE{
 		CONVERGE
 	}
@@ -36,18 +43,18 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException 	{
 		
-	//configurazione del sistema
+		//configurazione del sistema
 		Configuration conf = context.getConfiguration();//new Configuration();
 		
 		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
 		Path centers = new Path(conf.get("centersPath"));
 		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 		IntWritable key = new IntWritable();
-		Center cent = new Center();
+		Element cent = new Element();
 		
 		//leggo il file contenente i centri e inizializzo centroids
 		while(centRead.next(key, cent)){
-			Center tmp = new Center(cent.getParam());
+			Element tmp = new Element(cent.getParam());
 			OldCenter.add(tmp);
 		}
 
@@ -55,19 +62,22 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 	}
 
 
-	public void reduce(IntWritable key, Iterable<Center> values, Context context) throws IOException, InterruptedException {
+	public void reduce(IntWritable key, Iterable<Element> values, Context context) throws IOException, InterruptedException {
 
 		int iKey = key.get();
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
 
+		//numero istanze
 		double count = 0;
+		//elemento che conterrà la somma degli oggetti del combiner e permetterà di calcolare il nuovo centro
 		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
+		//inizializzo value
         for(int i = 0 ; i < size; i++){
             value.add(new DoubleWritable(0));
         }
 
-		for(Center c : values) {
+		for(Element c : values) {
 			//Somma parziale dei parametri di tutti gli elemnti appartenenti ad uno stesso centro
 			for(int i = 0; i < size; i++){
 				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
@@ -79,10 +89,11 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 		}
 
 		//calcolo la media per trovare il nuovo centro
-		Center newCenter = new Center(value, count);
+		Element newCenter = new Element(value, count);
 		newCenter.mean();
 
-		if(Center.distance(OldCenter.get(key.get()), newCenter) > 0.01)
+		//se la distnaza tra il veccio centro e quello nuovo è maggiore della soglia allora non converge
+		if(Element.distance(OldCenter.get(key.get()), newCenter) > 0.01)
 		{
 			context.getCounter(CONVERGENCE.CONVERGE).increment(1);
 		}
@@ -96,13 +107,12 @@ public class KMeansReducer extends Reducer<IntWritable, Center, IntWritable, Cen
 	protected void cleanup(Context context) throws IOException, InterruptedException{
 
 		//Aggiorno il file sequenziale dei centri per l'esecuzione successiva
-
 		Configuration conf = context.getConfiguration();
 		Path centers = new Path(conf.get("centersPath"));
 		FileSystem fs = FileSystem.get(conf);
         fs.delete(centers, true);
 
-		SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+		SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Element.class));
 		
 		Set set = Centri.entrySet();
 		Iterator newCenters = set.iterator();

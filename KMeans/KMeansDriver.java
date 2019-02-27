@@ -23,8 +23,6 @@ import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FSDataOutputStream;
-//import org.apache.hadoop.fs.FileStatus;
-//import org.apache.hadoop.conf.Configuration;
 
 public class KMeansDriver {
 
@@ -32,7 +30,7 @@ public class KMeansDriver {
 	private static void createCenter(int k, int param, Configuration conf, Path input, Path centers, int maxNumber, String split){
 	
 		try {
-			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Center.class));
+			SequenceFile.Writer centersFile = SequenceFile.createWriter(conf, SequenceFile.Writer.file(centers), SequenceFile.Writer.keyClass(IntWritable.class), SequenceFile.Writer.valueClass(Element.class));
 
 
 			FileSystem fs = FileSystem.get(conf);
@@ -41,7 +39,7 @@ public class KMeansDriver {
 			//Apro il dataset per estrapolare i centri iniziali 
 			BufferedReader brData = new BufferedReader(new InputStreamReader(fs.open(ri[0].getPath())));
 			String line;
-			Center tmp=new Center();
+			Element tmp=new Element();
 
 			//Scelta dei centri in base alla infromazioni fornite alla funzione
 			if(maxNumber == 0){
@@ -54,11 +52,11 @@ public class KMeansDriver {
 
 					//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
 					//tmp = new Center(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]));
-					tmp = new Center();
+					tmp = new Element();
 					for(int l = 0; l < param; l++){
 						tmp.addParam(Double.parseDouble(data[l]));
 					}
-					System.out.println("-------------------" + tmp.toString());
+					//System.out.println("-------------------" + tmp.toString());
 					centersFile.append(new IntWritable(i), tmp);
 				}
 			}
@@ -87,11 +85,11 @@ public class KMeansDriver {
 						String[] data = line.split(split);
 						
 						//Leggo le righe del dataset e le riscrivo nel file sequenziale che verrà letto durante l'esecuzione del mapper
-						tmp = new Center();
+						tmp = new Element();
 						for(int l = 0; l < param; l++){
 							tmp.addParam(Double.parseDouble(data[l]));
 						}
-						System.out.println("-------------------" + tmp.toString());
+						//System.out.println("-------------------" + tmp.toString());
 						centersFile.append(new IntWritable(id), tmp);
 						//rimuovo il centro perchè selezionato
 						cent.removeElement(idx);
@@ -106,36 +104,6 @@ public class KMeansDriver {
 			//chiudo il sequence file e il file del dataset
 			brData.close();
 			centersFile.close();
-
-
-
-			/*System.out.println("------------------- L E T T U R A    F I L E S E Q -------------------" + Double.MAX_VALUE +"-------------");
-
-
-
-
-
-			SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
-			IntWritable key = new IntWritable();
-			Center cent = new Center();
-			Center tmp1;
-			while(centRead.next(key, cent)){
-				tmp1 = new Center(cent.getX(), cent.getY(), cent.getZ());
-				Center tmpS = new Center(cent.getX(), cent.getY(), cent.getZ());
-				tmpS.sumCenter(tmp);
-				tmpS.incInstance();
-				tmpS.incInstance();
-				System.out.println("-------------------" + tmp1.toString());
-				System.out.println("------------------- SUM ----------" + tmpS.toString());
-				tmpS.mean();
-				System.out.println("------------------- SUM/MED ----------" + tmpS.toString());
-				System.out.println("------------------- DIST----------" + Center.distance(tmp, tmp1));
-				//centroids.add(tmp);
-			}*/
-
-
-
-
 
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -182,7 +150,7 @@ public class KMeansDriver {
 			if(loop != 0){
 				converge = true;
 			}
-			System.out.println("++++++++++++++++++++++" + split);
+			//System.out.println("++++++++++++++++++++++" + split);
 			if(split.equals("t")){
 				split = "\\t";
 			}
@@ -200,26 +168,27 @@ public class KMeansDriver {
 			//creo i centri
 			createCenter(numCenters, numParams, conf, input, centers, maxNum, split);
 			int n = 0;
+
 			//for(int n = 0; n < loop; n++){
-			//while(!converge){
+
+			//se i centri convergono oppure raggiungo il limite di ciclo impostato
+			//allora mi fermo
 			while((!converge) ||  (n < loop)){
 
 				//conf.setInt("number", n);
 			
-				// Create a configuration object for the job
+				//Creo il job e lo configuro
 				Job job_conf = Job.getInstance(conf, "KMeans");
 				job_conf.setJarByClass(KMeansDriver.class);
 
 				// Specify data type of output key and value
 				job_conf.setOutputKeyClass(IntWritable.class);
-				job_conf.setOutputValueClass(Center.class);
+				job_conf.setOutputValueClass(Element.class);
 
 				// Specify names of Mapper, Combiner and Reducer Class
 				job_conf.setMapperClass(KMeansMapper.class);
 				job_conf.setCombinerClass(KMeansCombiner.class);
 				job_conf.setReducerClass(KMeansReducer.class);
-
-				//job_conf.setNumReduceTasks(1);
 				
 				//imposto i percorsi di input e output
 				FileInputFormat.setInputPaths(job_conf, input);
@@ -227,11 +196,12 @@ public class KMeansDriver {
 				
 				//imposto i valori di uscita del mapper
 				job_conf.setMapOutputKeyClass(IntWritable.class);
-				job_conf.setMapOutputValueClass(Center.class);
+				job_conf.setMapOutputValueClass(Element.class);
 
 				//eseguo il job
 				job_conf.waitForCompletion(true);
 
+				//controllo se i centri convergono leggendo il valore del counter
 				if(job_conf.getCounters().findCounter(KMeansReducer.CONVERGENCE.CONVERGE).getValue() == 0)
 				{
 					converge = true;
@@ -252,7 +222,7 @@ public class KMeansDriver {
 			FileOutputFormat.setOutputPath(job_conf, output);
 			
 			job_conf.setMapOutputKeyClass(IntWritable.class);
-			job_conf.setMapOutputValueClass(Center.class);
+			job_conf.setMapOutputValueClass(Element.class);
 
 			job_conf.waitForCompletion(true);
 
@@ -260,21 +230,18 @@ public class KMeansDriver {
 			try {
 				
 				//Stampo il risultato dei centri e creo un file di testo contenente il risultato leggibile
-				System.out.println("------------------- L E T T U R A    F I L E S E Q    A G G I O R N A T O -------------------");
-
-				
-				//FileOutputStream fos = new FileOutputStream(/*new File(*/"centers/cent.txt"/*)*/, false);
+				//System.out.println("------------------- L E T T U R A    F I L E S E Q    A G G I O R N A T O -------------------");
 
 				FSDataOutputStream fsdos = fs.create(centersTxt, true);
 
 				SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 				IntWritable key = new IntWritable();
-				Center cent = new Center();
-				Center tmp1;
-				System.out.println("++++++++++++++++++++++");
+				Element cent = new Element();
+				Element tmp1;
+				//System.out.println("++++++++++++++++++++++");
 				while(centRead.next(key, cent)){
-					tmp1 = new Center(cent.getParam());
-					System.out.println("----------"+key.toString()+"---------" + tmp1.toString());
+					tmp1 = new Element(cent.getParam());
+					//System.out.println("----------"+key.toString()+"---------" + tmp1.toString());
 					fsdos.writeChars("-" + key.toString() + " : " + tmp1.toString() + "\n");
 					//centroids.add(tmp);
 				}
