@@ -20,6 +20,16 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import java.io.FileOutputStream;
 
+
+/**
+ * Classe Reducer che permette di effettuare il conteggio totale delle istanze di una chiave (centro) e il calcolo dei
+ * nuovi centri effetundo la media.
+ * Duarnte la fase di setup carica i vecchi centri dal file sequenziale per poterli poi confrontare coi nuovi.
+ * Durante la fase di cleanup sovrasccrive il file sequenziale coi nuovi centri, così da poterli usare nel ciclo successivo.
+ * 
+ * @author Davide Tarasconi
+ */
+
 public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, Element> {
 
 	/**

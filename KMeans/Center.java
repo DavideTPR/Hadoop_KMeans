@@ -8,6 +8,13 @@ import java.util.ArrayList;
 
 import org.apache.hadoop.io.DoubleWritable;
 
+/**
+ * @deprecated
+ * Classe che eredita da Element per differenziare gli elementi nomrmali dai centri
+ * 
+ * @author Davide Tarasconi
+ */
+
 public class Center extends Element{
 
     /**

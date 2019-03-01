@@ -47,6 +47,9 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Calcolo della distanza euclidea tra c1 e c2
+     * @param c1 elemento 1
+     * @param c2 elemento 2
+     * @return distanza tra c1 e c2
      */
     public static double distance(Element c1, Element c2) {
         double res = 0;
@@ -68,6 +71,7 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Costruttore che inizializza un cero numero di parametri
+     * @param size numero di parametri dell'elemento
      */
     public Element(int size){
         parameters = new ArrayList<DoubleWritable>();
@@ -81,6 +85,7 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Costruttore che inizializza i parametri
+     * @param param parametri dell'elemento
      */
     public Element(ArrayList<DoubleWritable> param){
         parameters = new ArrayList<DoubleWritable>();
@@ -94,6 +99,8 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Costruttore che inizializza i parametri e il conteggio delle istanze
+     * @param param paramentri dell'elemento
+     * @param iNum numero delle istanze (Nel caso l'elemento sia un centro è il numero di istanze appartenenti al cluser del centro)
      */
     public Element(ArrayList<DoubleWritable> param, double iNum){
         
@@ -135,7 +142,7 @@ public class Element implements WritableComparable<Element>{
     }
 
     /** 
-     * Ritorna la lista dei parametri
+     * @return lista dei parametri
     */
     public ArrayList<DoubleWritable> getParam(){
         return parameters;
@@ -143,6 +150,7 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Permette di aggiungere parametri
+     * @param d nuovo parametro
      */
     public void addParam(double d){
         parameters.add(new DoubleWritable(d));
@@ -172,14 +180,14 @@ public class Element implements WritableComparable<Element>{
     }
 
     /**
-     * Incrementa il numero delle istanze (mai usato per problemi)
+     * @deprecated Incrementa il numero delle istanze (mai usato per problemi)
      */
     public void incInstance(){
         double tmp = this.instanceNum.get();
         this.instanceNum.set(tmp + 1);
     }
     /**
-     * Fornisce il numero delle istanze
+     * @return numero delle istanze
      */
     public double getInstance(){
        return instanceNum.get();
@@ -187,15 +195,17 @@ public class Element implements WritableComparable<Element>{
 
     /**
      * Inizializza il numero delle istanze
+     * @param n numero delle istanze
      */
     public void setInstance(double n){
         this.instanceNum = new DoubleWritable(n);
      }
 
      /**
-      * Somma le istanze dell'oggetto con quelle dell'oggetto passato come parametro
+      * @deprecated Somma le istanze dell'oggetto con quelle dell'oggetto passato come parametro
+      * @param c elemento di cui dovremo sommare le istanze
       */
-    public void addInstance(Center c){
+    public void addInstance(Element c){
         this.instanceNum.set(this.instanceNum.get() + c.getInstance());
     }
 

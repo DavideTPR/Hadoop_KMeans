@@ -12,6 +12,14 @@ import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.DoubleWritable;
 
+/**
+ * Classe mapper che durante la fase iniziale di setup si occupa della lettura dei centri iniziali dal file sequenziale
+ * dopodichè avvia un processo Map per ogni elemento letto dal dataset e lo assegna al centro che ha distanza minore.
+ * Il risultato verra parrasto ad un processo Combiner
+ * 
+ * @author Davide Tarasconi 
+ */
+
 
 public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 

@@ -17,6 +17,13 @@ import org.apache.hadoop.io.DoubleWritable;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 
+/**
+ * Classe Combiner che si occupa di effettuare le somme parziali dei dati passati dal Mapper contando 
+ * anche il numero di istanze appartenente alla chiave analizzata. Il risultato viene passato ad un Reducer.
+ * 
+ * @author Davide Tarasconi
+ */
+
 public class KMeansCombiner extends Reducer<IntWritable, Element, IntWritable, Element> {
 
 

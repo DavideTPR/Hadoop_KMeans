@@ -24,9 +24,28 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.FSDataOutputStream;
 
+
+/**
+ * Classe principale che si occupa dello svolgimento dei processi di Map-Reduce e della creazione dei centri iniziali.
+ * Converte il file sequenziale finale in un file di testo leggibile
+ * 
+ * @author Davide Tarasconi
+ */
+
+
 public class KMeansDriver {
 
 
+	/**
+	 * Metodo per l'inizializzazione dei centri iniziali e la creazione del file sequenziale
+	 * @param k numero di centri
+	 * @param param numero di parametri per ogni centro
+	 * @param conf configurazione sistema
+	 * @param input percorso del dataset
+	 * @param centers percorso in cui creare il file sequenziale
+	 * @param maxNumber numero massimo entro cui verranno scelti i k parametri (0 per scegliere i primi k)
+	 * @param split carattere per effettuare la divisione dei parametri nella stringa letta dal dataset ('t' per tabulazioni)
+	 */
 	private static void createCenter(int k, int param, Configuration conf, Path input, Path centers, int maxNumber, String split){
 	
 		try {
@@ -150,7 +169,7 @@ public class KMeansDriver {
 			if(loop != 0){
 				converge = true;
 			}
-			//System.out.println("++++++++++++++++++++++" + split);
+			
 			if(split.equals("t")){
 				split = "\\t";
 			}
