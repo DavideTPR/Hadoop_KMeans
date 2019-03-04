@@ -2,7 +2,7 @@ Hadoop KMeans
 =============
 K-Means algorithm developed in Java to run on Hadoop system
 
-##Use:
+## Use:
 
 1. Export CLASSPATH
 2. Compile code and create jar file
