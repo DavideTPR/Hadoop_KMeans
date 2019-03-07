@@ -11,9 +11,9 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
- * Classe per la gestione degli elementi letti dal datacenter durante le operazioni di Map-Reduce
- * che ne permette anche la gestione come centri greazie alla possibilita di inserire il numero di elementi
- * appartenenti ad un determinato centro e alla possibilità di calcolare la media
+ * Class used to manage the record of the dataset during the elaboration. It also allows to manage centroids
+ * setting number of parameters, computing the mean and memorizing number of insyances belonging to a specified
+ * centroids
  * 
  * 
  * @author Davide Tarasconi
@@ -23,17 +23,17 @@ public class Element implements WritableComparable<Element>{
     
 
     /**
-    * Lista dei parametri degli elementi del dataset
+    * List of dataset parameters
     */
     protected ArrayList<DoubleWritable> parameters;
 
     /**
-    * numero di elementi di un determinato centro
+    * Number of element of a specified centrods
     */
     public DoubleWritable instanceNum;
     
     /**
-     * Calcolo della distanza euclidea tra c1 e c2
+     * Euclidean distance between c1 and c2
      */
     /*public static double distance(Center c1, Center c2) {
         double res = 0;
@@ -46,10 +46,10 @@ public class Element implements WritableComparable<Element>{
     }*/
 
     /**
-     * Calcolo della distanza euclidea tra c1 e c2
-     * @param c1 elemento 1
-     * @param c2 elemento 2
-     * @return distanza tra c1 e c2
+     * Euclidean distance between c1 and c2
+     * @param c1 element 1
+     * @param c2 element 2
+     * @return distance between c1 and c2
      */
     public static double distance(Element c1, Element c2) {
         double res = 0;
@@ -62,7 +62,7 @@ public class Element implements WritableComparable<Element>{
     }
     
     /**
-     * Costruttore base
+     * Basic constructor
      */
     public Element(){
         parameters = new ArrayList<DoubleWritable>();
@@ -70,8 +70,8 @@ public class Element implements WritableComparable<Element>{
     }
 
     /**
-     * Costruttore che inizializza un cero numero di parametri
-     * @param size numero di parametri dell'elemento
+     * Initialize some parameters
+     * @param size number of parameters
      */
     public Element(int size){
         parameters = new ArrayList<DoubleWritable>();
@@ -84,8 +84,8 @@ public class Element implements WritableComparable<Element>{
     }
 
     /**
-     * Costruttore che inizializza i parametri
-     * @param param parametri dell'elemento
+     * Initialize parameters
+     * @param param parameters
      */
     public Element(ArrayList<DoubleWritable> param){
         parameters = new ArrayList<DoubleWritable>();
@@ -98,9 +98,9 @@ public class Element implements WritableComparable<Element>{
     }
 
     /**
-     * Costruttore che inizializza i parametri e il conteggio delle istanze
-     * @param param paramentri dell'elemento
-     * @param iNum numero delle istanze (Nel caso l'elemento sia un centro è il numero di istanze appartenenti al cluser del centro)
+     * Initialize parameters and number of instances
+     * @param param parameters
+     * @param iNum number of instances (if it is a centroids it is the number of instances belonging to that centroids)
      */
     public Element(ArrayList<DoubleWritable> param, double iNum){
         
@@ -114,10 +114,10 @@ public class Element implements WritableComparable<Element>{
     }
 
     public void readFields(DataInput dataInput) throws IOException {
-        //leggo quanti parametri ha l'elemento
+        //read how many parameters we have
         int size = dataInput.readInt();
         parameters = new ArrayList<DoubleWritable>();
-        //leggo i parametri
+        //read parameters
         for(int i = 0; i < size; i++){
             parameters.add(new DoubleWritable(dataInput.readDouble()));
         }
@@ -126,9 +126,9 @@ public class Element implements WritableComparable<Element>{
     }
 
     public void write(DataOutput dataOutput) throws IOException {
-        //scrivo il numero di parametri
+        //write number of parameters
         dataOutput.writeInt(parameters.size());
-        //scrivo i parametri
+        //write parameters
         for(int i = 0; i < parameters.size(); i++){
             dataOutput.writeDouble(parameters.get(i).get());
         }
@@ -142,22 +142,22 @@ public class Element implements WritableComparable<Element>{
     }
 
     /** 
-     * @return lista dei parametri
+     * @return list of parameters
     */
     public ArrayList<DoubleWritable> getParam(){
         return parameters;
     }
 
     /**
-     * Permette di aggiungere parametri
-     * @param d nuovo parametro
+     * Add new parameters
+     * @param d new parameter
      */
     public void addParam(double d){
         parameters.add(new DoubleWritable(d));
     }
 
     /**
-     * Calcola la media dei parametri
+     * Computation of the mean
      */
     public void mean(){
         for(int i = 0; i < parameters.size(); i++){
@@ -180,30 +180,30 @@ public class Element implements WritableComparable<Element>{
     }
 
     /**
-     * @deprecated Incrementa il numero delle istanze (mai usato per problemi)
+     * @deprecated Increment number of instances (never used)
      */
     public void incInstance(){
         double tmp = this.instanceNum.get();
         this.instanceNum.set(tmp + 1);
     }
     /**
-     * @return numero delle istanze
+     * @return Number of instances
      */
     public double getInstance(){
        return instanceNum.get();
     }
 
     /**
-     * Inizializza il numero delle istanze
-     * @param n numero delle istanze
+     * Set number of instances
+     * @param n number of instances
      */
     public void setInstance(double n){
         this.instanceNum = new DoubleWritable(n);
      }
 
      /**
-      * @deprecated Somma le istanze dell'oggetto con quelle dell'oggetto passato come parametro
-      * @param c elemento di cui dovremo sommare le istanze
+      * @deprecated Sum my number of instances with instances of c 
+      * @param c element with certain number of instances
       */
     public void addInstance(Element c){
         this.instanceNum.set(this.instanceNum.get() + c.getInstance());

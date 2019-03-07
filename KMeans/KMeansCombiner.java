@@ -18,8 +18,9 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.fs.FSDataOutputStream;
 
 /**
- * Classe Combiner che si occupa di effettuare le somme parziali dei dati passati dal Mapper contando 
- * anche il numero di istanze appartenente alla chiave analizzata. Il risultato viene passato ad un Reducer.
+ * Combiner class used to get partial sum of data passed from Mapper. It counts number of instances belonging to 
+ * analyzed key.
+ * The output will be passed to Reducer process
  * 
  * @author Davide Tarasconi
  */
@@ -42,19 +43,20 @@ public class KMeansCombiner extends Reducer<IntWritable, Element, IntWritable, E
         }
 
 		for(Element c : values) {
-			//Somma parziale dei parametri di tutti gli elemnti appartenenti ad uno stesso centro
+			
+			//Partial sum of parameters of every elements belonging to same centroid
 			for(int i = 0; i < size; i++){
 				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
 			}
 
-			//aumento il numero di elementi appartenenti a quel centro
+			//increment number of instances of that centroid
 			count++;
 			
 		}
 
-		//Creo l'elemento con il conteggio delle istanze e le somme dei parametri
+		//Create element and set number of instances and parameters
 		Element valueSum = new Element(value, count);
-		//Passo i valori al Reducer
+		//pass value to Reducer
 		context.write(key, valueSum);
 	}
 }

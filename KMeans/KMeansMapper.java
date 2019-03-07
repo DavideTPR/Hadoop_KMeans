@@ -13,9 +13,9 @@ import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.DoubleWritable;
 
 /**
- * Classe mapper che durante la fase iniziale di setup si occupa della lettura dei centri iniziali dal file sequenziale
- * dopodichè avvia un processo Map per ogni elemento letto dal dataset e lo assegna al centro che ha distanza minore.
- * Il risultato verra parrasto ad un processo Combiner
+ * Mapper Class that reads centroids from sequential file during setup phase, then execute Map process for every dataset's
+ * record and it assigns it to the nearest centroids.
+ * The output will be passed to Combiner process
  * 
  * @author Davide Tarasconi 
  */
@@ -23,22 +23,22 @@ import org.apache.hadoop.io.DoubleWritable;
 
 public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 
-	//vettore dei centroidi
+	//Centroids vector
 	private static Vector<Element> centroids = new Vector<Element>();
 
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
 		
-    //configurazione del sistema
+    //system configuration
 		Configuration conf = context.getConfiguration();//new Configuration();
 		
-		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
+		//Open sequence file and read the centroids
 		Path centers = new Path(conf.get("centersPath"));
 		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 		IntWritable key = new IntWritable();
 		Element cent = new Element();
 		
-		//leggo il file contenente i centri e inizializzo centroids
+		//read the file and set centroids
 		while(centRead.next(key, cent)){
 			Element tmp = new Element(cent.getParam());
 			centroids.add(tmp);
@@ -54,8 +54,8 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 		double dis;
 		int index = -1;
 		//Vector<double> instance;
-		Element element;	//utilizziamo Center al posto di Element perchè l'output del mapper deve coincidere con l'input del combiner che a sua volda 
-							//deve coincidere col suo output perchè non è conosciuto il numero di volte in cui verrà applicato il Combiner 
+		Element element;	//We use Element class instead of Center class because mapper output must coincide with combiner input
+											//that will coincide with its output because we don't know how many times Combiner will be execute
 		Element cent;
 		IntWritable idx;
 
@@ -64,10 +64,10 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 		String split = conf.get("split");
 		String valueString = value.toString();
 
-		//split della stringa in base al valore passato come parametro
+		//split using separator
 		String[] SingleData = valueString.split(split); // or \\t
 
-		//creo e inizializzo l'elemento in base a ciò che è stato letto nel dataset
+		//Create and set element read into the dataset
 		element= new Element();
 		for(int n = 0; n < size; n++){
 			element.addParam(Double.parseDouble(SingleData[n]));
@@ -77,10 +77,10 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 		
 		for(Element c : centroids){
 			
-			//calcolo la distanza da tutti i centri e lo assegno a quello più vicino
+			//computation of the distance
 			dis = Element.distance(c, element);
 			
-			//controllo se la distanza è la minore
+			//check if it is the lower distance
 			if(dis < minDis)
 			{
 				cent = c;
@@ -91,7 +91,7 @@ public class KMeansMapper extends Mapper<Object, Text, IntWritable, Element> {
 		}
 
 		idx = new IntWritable(index);
-		//passo i valori al Combiner
+		//pass value to Combiner
 		context.write(idx, element);
 	}
 }

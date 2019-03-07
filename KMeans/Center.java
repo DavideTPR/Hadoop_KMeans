@@ -10,7 +10,7 @@ import org.apache.hadoop.io.DoubleWritable;
 
 /**
  * @deprecated
- * Classe che eredita da Element per differenziare gli elementi nomrmali dai centri
+ * It inherits from Element for differentiating normal element from centroids
  * 
  * @author Davide Tarasconi
  */
@@ -18,12 +18,12 @@ import org.apache.hadoop.io.DoubleWritable;
 public class Center extends Element{
 
     /**
-     * numero di elementi di un determinato centro
+     * Number of element of a specified centrods
      */
     public DoubleWritable instanceNum;
     
     /**
-     * Calcolo della distanza euclidea tra c1 e c2
+     * Euclidean distance between c1 and c2
      */
     public static double distance(Center c1, Center c2) {
         double res = 0;
@@ -36,7 +36,7 @@ public class Center extends Element{
     }
 
     /**
-     * Calcolo della distanza euclidea tra c1 e c2
+     * Euclidean distance between c1 and c2
      */
     public static double distance(Center c1, Element c2) {
         double res = 0;
@@ -49,7 +49,7 @@ public class Center extends Element{
     }
     
     /**
-     * Costruttore base
+     * Basic constructor
      */
     public Center(){
         super();
@@ -57,7 +57,7 @@ public class Center extends Element{
     }
 
     /**
-     * Inizializza i parametri
+     * Set parameters
      */
     public Center(ArrayList<DoubleWritable> param){
         super(param);
@@ -65,7 +65,7 @@ public class Center extends Element{
     }
 
     /**
-     * Inizializza i parametri e il numero di elementi
+     * Set parameters and number of instances
      */
     public Center(ArrayList<DoubleWritable> param, double iNum){
         super(param);
@@ -81,7 +81,7 @@ public class Center extends Element{
     }*/
 
     /**
-     * Calcola la media dei parametri
+     * Computation of the mean
      */
     public void mean(){
         for(int i = 0; i < parameters.size(); i++){

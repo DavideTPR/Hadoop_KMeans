@@ -22,10 +22,12 @@ import java.io.FileOutputStream;
 
 
 /**
- * Classe Reducer che permette di effettuare il conteggio totale delle istanze di una chiave (centro) e il calcolo dei
- * nuovi centri effetundo la media.
- * Duarnte la fase di setup carica i vecchi centri dal file sequenziale per poterli poi confrontare coi nuovi.
- * Durante la fase di cleanup sovrasccrive il file sequenziale coi nuovi centri, così da poterli usare nel ciclo successivo.
+ * Reducer class used to get the total number of instances for a certain key (centroid) and compute new centroids
+ * computing the mean.
+ * During setup phase it loads old centroids from sequence file, they will be compared with the new ones to check convergence
+ * less then a threshold.
+ * During cleanup phase it overwrites sequence file with new centroids that will be used into following loop.
+ * 
  * 
  * @author Davide Tarasconi
  */
@@ -33,17 +35,17 @@ import java.io.FileOutputStream;
 public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, Element> {
 
 	/**
-	 * Mappa per salvare il centro calcolato e poterlo scrivere nel file sequenziale
+	 * Map to save computer centrod to write into sequence file
 	 */
 	HashMap<IntWritable, Element> Centri = new HashMap<IntWritable, Element>();
 
 	/**
-	 * Vettore dei centroidi
+	 * Centroids vector
 	 */
 	private static Vector<Element> OldCenter = new Vector<Element>();
 
 	/**
-	 * Utilizzato per valutare la convergenza
+	 * Counter used to check convergence
 	 */
 	public enum CONVERGENCE{
 		CONVERGE
@@ -53,16 +55,16 @@ public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, El
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException 	{
 		
-		//configurazione del sistema
+		//system configuration
 		Configuration conf = context.getConfiguration();//new Configuration();
 		
-		//APRO IL FILE SEQUENZIALE CONTENENTE I CENTRI
+		//Open sequence file and read the centroids
 		Path centers = new Path(conf.get("centersPath"));
 		SequenceFile.Reader centRead = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centers));
 		IntWritable key = new IntWritable();
 		Element cent = new Element();
 		
-		//leggo il file contenente i centri e inizializzo centroids
+		//read the file and set centroids
 		while(centRead.next(key, cent)){
 			Element tmp = new Element(cent.getParam());
 			OldCenter.add(tmp);
@@ -78,31 +80,31 @@ public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, El
 		Configuration conf = context.getConfiguration();
 		int size = conf.getInt("numParams", 3);
 
-		//numero istanze
+		//number of instances
 		double count = 0;
-		//elemento che conterrà la somma degli oggetti del combiner e permetterà di calcolare il nuovo centro
+		//element that will contain sum of combiner's partial sum
 		ArrayList<DoubleWritable> value = new ArrayList<DoubleWritable>();
-		//inizializzo value
+		//set value
         for(int i = 0 ; i < size; i++){
             value.add(new DoubleWritable(0));
         }
 
 		for(Element c : values) {
-			//Somma parziale dei parametri di tutti gli elemnti appartenenti ad uno stesso centro
+			//Partial sum of parameters of every elements belonging to same centroid
 			for(int i = 0; i < size; i++){
 				value.get(i).set(value.get(i).get() + c.getParam().get(i).get());
 			}
 			
-			//aumento il numero di elementi appartenenti a quel centro
+			//increment number of instances of that centroid
 			count += c.instanceNum.get();
 
 		}
 
-		//calcolo la media per trovare il nuovo centro
+		//Find new centroid computing the mean
 		Element newCenter = new Element(value, count);
 		newCenter.mean();
 
-		//se la distnaza tra il veccio centro e quello nuovo è maggiore della soglia allora non converge
+		//Result desn't converge if distance between old and new centroids is greater than threshold
 		if(Element.distance(OldCenter.get(key.get()), newCenter) > 0.01)
 		{
 			context.getCounter(CONVERGENCE.CONVERGE).increment(1);
@@ -116,7 +118,7 @@ public class KMeansReducer extends Reducer<IntWritable, Element, IntWritable, El
 	//@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException{
 
-		//Aggiorno il file sequenziale dei centri per l'esecuzione successiva
+		//Update sequence file with centroids to use in following execution
 		Configuration conf = context.getConfiguration();
 		Path centers = new Path(conf.get("centersPath"));
 		FileSystem fs = FileSystem.get(conf);
