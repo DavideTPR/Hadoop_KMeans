@@ -14,12 +14,13 @@ class Element:
         self.z = float(self.z)
 
 def main():
+    #dataset = open("../OUTPUT_MALL_1/part-r-00000", "r")
     dataset = open("KMeans/part-r-00000", "r")
 
-    x = [[],[],[],[],[]]
-    y = [[],[],[],[],[]]
-    z = [[],[],[],[],[]]
-    n = [[],[],[],[],[]]
+    x = [[],[],[],[]]
+    y = [[],[],[],[]]
+    z = [[],[],[],[]]
+    n = [[],[],[],[]]
 
     elements = []
 
@@ -31,6 +32,9 @@ def main():
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
+    #ax.set_xlabel("Age")
+    #ax.set_ylabel("Annual Income (k$)")
+    #ax.set_zlabel("Spending Score")
 
     for i in range(len(x)):
         ax.scatter3D(x[i], y[i], z[i])
