@@ -14,8 +14,8 @@ class Element:
         self.z = float(self.z)
 
 def main():
-    #dataset = open("../OUTPUT_MALL_1/part-r-00000", "r")
-    dataset = open("KMeans/part-r-00000", "r")
+    dataset = open("../OUTPUT_MALL_3/part-r-00000", "r")
+    #dataset = open("KMeans/part-r-00000", "r")
 
     x = [[],[],[],[]]
     y = [[],[],[],[]]

@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Vector;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
@@ -193,6 +194,11 @@ public class KMeansDriver {
 
 			//for(int n = 0; n < loop; n++){
 
+			Date date;
+			long start, end;
+
+			date = new Date();
+			start = date.getTime();
 			//stop the loop if centroids converge or reach given number
 			while((!converge) ||  (n < loop)){
 
@@ -247,6 +253,11 @@ public class KMeansDriver {
 
 			job_conf.waitForCompletion(true);
 
+			date = new Date();
+			end = date.getTime();
+
+			System.out.println(" - Execution time (milliseconds): "+(end-start));
+			System.out.println(" - Execution time (seconds): "+(end-start)*0.001F);
 
 			try {
 				
