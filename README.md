@@ -1,4 +1,4 @@
-Hadoop KMeans
+Hadoop k-Means
 =============
 K-Means algorithm developed in Java to run on Hadoop system
 
